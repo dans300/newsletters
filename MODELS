@@ -1,0 +1,17 @@
+llama3.1:8b 5 MISTAKES 
+gemma3:4b 3 mistakes
+gemma3:12b 8 mistakes
+gemma3:27b wont execute 
+qwen3:8b  wont execute        
+llama3.2:latest  4 mistakes  
+llama3.2:3b   4 mistakes    
+qwen3:30b 6 mistakes    
+deepseek-r1:7b unreliable 
+gpt-oss:20b  2 mistakes            
+phi4-mini     1 mistake    
+gemma3:4b 1 mistake but BETTER 
+
+
+
+
+'https://somfy-my.sharepoint.com/personal/daniel_sierra_somfy_com/Documents/Documents/Competition360/[local oneSheet MASTER_DATA_FILE_QTY -.xlsm]A) MShare_data'!$A:$Y
