@@ -9,6 +9,7 @@ from reportlab.lib.styles import ParagraphStyle
 from reportlab.lib.pagesizes import letter
 from reportlab.lib import colors
 from reportlab.lib.units import inch
+from urllib.parse import urlparse
 
 import re
 today = date.today().strftime("%B %d, %Y")
@@ -123,9 +124,33 @@ style_back      = ParagraphStyle("back",      fontSize=9,  fontName="Helvetica-O
 style_site = ParagraphStyle("site", fontSize=22, fontName="Helvetica-Bold", textColor=colors.HexColor("#2C3E50"), spaceAfter=16, spaceBefore=20)
 style_body = ParagraphStyle("body", fontSize=10, fontName="Helvetica",      textColor=colors.HexColor("#333333"), spaceAfter=4,  leading=16)
 
-sites = list(dict.fromkeys(urlparse(a["site"]).netloc.split('.')[-2].capitalize() for a in articles if "site" in a))
+
+# Add entries here for any site whose auto-generated name you don't like.
+# Key = a piece of the domain to match, Value = the name to use instead.
+SITE_OVERRIDES = {
+    "https://us14.campaign-archive.com/feed?u=f8bcf676bb27fc2419df09e98&id=c744bdaafe": "FIEC",
+    "https://us11.campaign-archive.com/feed?u=3c690b345db3823f0db0cac0f&id=bfc8c22a7a": "TheConstructionVoice",
+    "wsj.com": "WSJ",
+}
+
+def get_site_name(url):
+    netloc = urlparse(url).netloc.lower()
+    if netloc.startswith("www."):
+        netloc = netloc[4:]
+    for domain, name in SITE_OVERRIDES.items():
+        if netloc.endswith(domain):
+            return name
+    return netloc.split('.')[-2].capitalize()  # fallback: your original logic
+
+sites = list(dict.fromkeys(get_site_name(a["site"]) for a in articles if "site" in a))
 title_text = " | ".join(sites)
-file_name=title_text.replace(" | ", "") +" " + today+".pdf"
+file_name = title_text.replace(" | ", "") + " " + today + ".pdf"
+
+
+
+
+
+
 
 doc = SimpleDocTemplate(file_name, pagesize=letter,
                         leftMargin=inch, rightMargin=inch, topMargin=inch, bottomMargin=inch)
