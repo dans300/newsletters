@@ -115,7 +115,7 @@ def clean_article(content):
 
 
 # Load, Process, and Save
-with open("newsletter - Copy.json", "r", encoding="utf-8") as file:
+with open("newsletter.json", "r", encoding="utf-8") as file:
     articles = json.load(file)
 
 for i, article in enumerate(articles):
