@@ -24,7 +24,7 @@ from firecrawl import Firecrawl
 
 import os
 
-app = Firecrawl(api_key=os.getenv("FIRECRAWL_API_KEY"))
+app = Firecrawl(api_key=os.getenv("FIRE_CRAWL"))
 #groupsomfy fc-3840d2d759ba4fc780bdbe2cf53ddfa5
 #brandon api fc-5be3e611cd87485e9e703556a4522f78
 #GITHUB fc-0647e8554d984502b02fcb4e59109672

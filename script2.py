@@ -20,10 +20,10 @@ custom_http_client = httpx.Client(verify=False)
 
 
 
-
+openrouter_key = os.getenv("OPN_ROUTER")
 
 # Initialize the local Ollama client
-client = OpenAI(base_url="https://openrouter.ai/api/v1", api_key="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",
+client = OpenAI(base_url="https://openrouter.ai/api/v1", api_key=openrouter_key,
                 http_client=custom_http_client)
 name="google/gemma-3-4b-it"
 def get_somfy_category(title, summary):
