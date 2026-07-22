@@ -20,7 +20,7 @@ custom_http_client = httpx.Client(verify=False)
 
 
 
-openrouter_key = os.getenv("OPN_ROUTER")
+openrouter_key = os.getenv("OPENROUTER_API_KEY")
 
 # Initialize the local Ollama client
 client = OpenAI(base_url="https://openrouter.ai/api/v1", api_key=openrouter_key,
