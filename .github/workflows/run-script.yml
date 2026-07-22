@@ -1,0 +1,33 @@
+name: News Scraper Pipeline
+
+on:
+  schedule:
+    - cron: '0 8 * * 1'  # Runs every Monday at 08:00 UTC
+  workflow_dispatch:     # Allows manual trigger from GitHub UI
+
+jobs:
+  run-pipeline:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'  # Set to match your local python --version
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Run first script
+        env:
+          FIRECRAWL_API_KEY: ${{ secrets.FIRE_CRAWL }}
+        run: python script1.py  # Replace with actual filename
+
+      - name: Run second script
+        env:
+          OPENROUTER_API_KEY: ${{ secrets.OPN_ROUTER }}
+        run: python script2.py  # Replace with actual filename

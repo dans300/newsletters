@@ -28,8 +28,8 @@ app = Firecrawl(api_key="fc-3840d2d759ba4fc780bdbe2cf53ddfa5")
 #GITHUB fc-0647e8554d984502b02fcb4e59109672
 SITES = [  
     #"https://www.batiactu.com/accueil.rss",
-    #"https://www.lemoniteur.fr/arc/outboundfeeds/rss/",
-   #"https://us14.campaign-archive.com/feed?u=f8bcf676bb27fc2419df09e98&id=c744bdaafe",
+    "https://www.lemoniteur.fr/arc/outboundfeeds/rss/",
+   "https://us14.campaign-archive.com/feed?u=f8bcf676bb27fc2419df09e98&id=c744bdaafe",
    #"https://bauinfoconsult.de/feed/"
     
     #"https://www.geb-info.de/rss_feed/geb-rss-feed-meldungen",
