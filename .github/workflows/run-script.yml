@@ -32,3 +32,14 @@ jobs:
         env:
           OPENROUTER_API_KEY: ${{ secrets.OPN_ROUTER }}
         run: python script2.py  # Replace with actual filename
+      # Add this new step below your scripts:
+      - name: Save generated files
+        uses: actions/upload-artifact@v4
+        with:
+          name: my-scraper-files
+          path: |
+            *.pdf
+            *.csv
+            *.txt
+            # (Change these extensions to match whatever your python scripts generate, 
+            # or put the exact filename like 'daily_report.pdf')
