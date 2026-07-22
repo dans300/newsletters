@@ -78,7 +78,7 @@ def clean_article(content):
 
 
 # Load, Process, and Save
-with open("newsletter2.json", "r", encoding="utf-8") as file:
+with open("newsletter - test.json", "r", encoding="utf-8") as file:
     articles = json.load(file)
 
 for i, article in enumerate(articles):
@@ -133,14 +133,22 @@ SITE_OVERRIDES = {
     "wsj.com": "WSJ",
 }
 
+def strip_scheme(u):
+    return u.split("://", 1)[-1]
+
 def get_site_name(url):
     netloc = urlparse(url).netloc.lower()
     if netloc.startswith("www."):
         netloc = netloc[4:]
-    for domain, name in SITE_OVERRIDES.items():
-        if netloc.endswith(domain):
+
+    for key, name in SITE_OVERRIDES.items():
+        if key.startswith("http"):
+            if strip_scheme(url) == strip_scheme(key):
+                return name
+        elif netloc.endswith(key):
             return name
-    return netloc.split('.')[-2].capitalize()  # fallback: your original logic
+
+    return netloc.split('.')[-2].capitalize()
 
 sites = list(dict.fromkeys(get_site_name(a["site"]) for a in articles if "site" in a))
 title_text = " | ".join(sites)
