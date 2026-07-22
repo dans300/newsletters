@@ -23,18 +23,29 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
-      - name: Run first script
+      - name: Run scripts and isolate outputs
         env:
           FIRECRAWL_API_KEY: ${{ secrets.FIRE_CRAWL }}
-        run: python script1.py  # Replace with actual filename
-
-      - name: Run second script
-        env:
           OPENROUTER_API_KEY: ${{ secrets.OPN_ROUTER }}
-        run: python script2.py  # Replace with actual filename
-      # Add this new step below your scripts:
-      - name: Save generated files
+        run: |
+          # 1. Hide old repository PDFs so they don't get mixed in
+          mkdir -p hidden_old_pdfs
+          mv *.pdf hidden_old_pdfs/ 2>/dev/null || true
+          
+          # 2. Run the scripts (they will drop new files in the root folder)
+          python script1.py
+          python script2.py
+          
+          # 3. Create the dedicated output folder
+          mkdir -p output
+          
+          # 4. Move ONLY the freshly generated files into the output folder
+          mv newsletter.json output/
+          mv *.pdf output/
+          
+      - name: Save output folder
         uses: actions/upload-artifact@v4
         with:
           name: my-scraper-files
-          path: output/ # This grabs everything inside the 'output' folder, ignoring the rest of your repo
+          path: output/
+      
