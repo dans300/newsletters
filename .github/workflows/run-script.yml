@@ -37,9 +37,4 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: my-scraper-files
-          path: |
-            *.pdf
-            *.csv
-            *.txt
-            # (Change these extensions to match whatever your python scripts generate, 
-            # or put the exact filename like 'daily_report.pdf')
+          path: output/ # This grabs everything inside the 'output' folder, ignoring the rest of your repo
