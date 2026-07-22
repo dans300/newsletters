@@ -1,0 +1,6 @@
+reportlab
+firecrawl-py
+urllib3
+requests
+openai
+httpx
