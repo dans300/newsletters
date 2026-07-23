@@ -118,17 +118,37 @@ def clean_article(content):
 with open("newsletter.json", "r", encoding="utf-8") as file:
     articles = json.load(file)
 
+default_category="others"
+
 for i, article in enumerate(articles):
     article["anchor_id"] = f"art_{i}"    
-    category = get_somfy_category(article.get("title", ""), article.get("summary", ""))
+    
+    # Try to get the category, catch the crash if the API fails
+    try:
+        category = get_somfy_category(article.get("title", ""), article.get("summary", ""))
+    except Exception as e:
+        print(f"API error on article {i}, defaulting to 'Others': {e}")
+        category = default_category
+
+    # If the API succeeds but returns None or an empty string, fallback to Others
+    if not category:
+        category = default_category
+
     article["category"] = category
-    print(f"[{category}] {article['title'][:50]}...")
+    
+    # Safely grab the title so the print statement doesn't crash if title is missing
+    title = article.get("title", "Untitled")
+    print(f"[{category}] {title[:50]}...")
+    
     raw_content = article.get("content", "")
     if raw_content:
         article["clean_content"] = clean_article(raw_content)
     else:
         article["clean_content"] = ""
-    
+
+
+
+
 
 with open("articles_classified.json", "w", encoding="utf-8") as file:
     json.dump(articles, file, indent=2)
