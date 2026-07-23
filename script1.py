@@ -136,7 +136,7 @@ print(f"\nDone. {len(results)} articles saved to newsletter.json")
 
 
 
-
+"""
 # Generate PDF
 
 from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, PageBreak, HRFlowable
@@ -171,4 +171,4 @@ for article in results:
 
 doc.build(story)
 print("PDF saved to newsletter.pdf")
-
+"""
