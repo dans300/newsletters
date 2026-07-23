@@ -66,7 +66,9 @@ def get_somfy_category(title, summary):
         except Exception:
             continue
     #((((((((((((((((((((((((((()))))))))))))))))))))))))))
-    
+    # 🛑 SAFETY GUARD: If all 3 providers failed, don't try to read .choices[0]
+    if not response or not hasattr(response, 'choices') or not response.choices:
+        return "others"
     
     raw = response.choices[0].message.content.strip()
   
@@ -74,7 +76,7 @@ def get_somfy_category(title, summary):
     for word in allowed:
         if word.lower() in raw.lower():
             return word
-    return "error"  # Fallback category
+    return "others"  # Fallback category
 
 
 
