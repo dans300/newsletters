@@ -27,6 +27,7 @@ jobs:
         env:
           FIRECRAWL_API_KEY: ${{ secrets.FIRE_CRAWL }}
           OPENROUTER_API_KEY: ${{ secrets.OPN_ROUTER }}
+          SEND_KEY: ${{ secrets.SEND_KEY }}
         run: |
           # 1. Hide old repository PDFs so they don't get mixed in
           mkdir -p hidden_old_pdfs
@@ -42,6 +43,9 @@ jobs:
           # 4. Move ONLY the freshly generated files into the output folder
           mv newsletter.json output/
           mv *.pdf output/
+
+          # 5. Send the email via Resend API
+          python send_email.py
           
       - name: Save output folder
         uses: actions/upload-artifact@v4
