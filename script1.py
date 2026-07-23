@@ -38,7 +38,7 @@ SITES = [
     #"https://www.glaswelt.de/rss_feed/gw-rss-feed-meldungen",
     #"https://www.haustec.de/rss/heizung",
     "https://us11.campaign-archive.com/feed?u=3c690b345db3823f0db0cac0f&id=bfc8c22a7a",
-    "https://www.kunststoffweb.de/rss/" 
+    #"https://www.kunststoffweb.de/rss/" 
     #"https://www.avproglobal.com/blogs/news/tagged/avpro-global.atom"
          
           ]
