@@ -41,7 +41,7 @@ payload = {
     "from": "Acme <onboarding@resend.dev>", # Resend's default testing address
     "to": [receiver_email],
     "subject": "Your Generated Newsletter",
-    "html": "<p>Here is the latest automated newsletter attached as a PDF.</p>",
+    "html": "<p>Mesdames et messieurs , this is an automatic pipeline scheduled to run at given intervals for testing, Here is the latest automated newsletter attached as a PDF.This is only two newsletters scrapped summarized and classified ,why? because we need to pay for firecrawl for more monthly tokens , right now this is running on the very few ones we get for free ,but this is pretty much done and this is the king of email you would recieve weekly with all newsletters summarized .  -Daniel SIERRA</p>",
     "attachments": [
         {
             "filename": attachment_name,
