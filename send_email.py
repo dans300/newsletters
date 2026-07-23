@@ -10,7 +10,7 @@ api_key = os.getenv("SEND_KEY")
 
 # WARNING: On Resend's free tier, the "to" email MUST be the exact 
 # email address you used to sign up for your Resend account.
-receiver_email = "groupsomfy@gmail.com" 
+receiver_email = "daniel.sierra@somfy.com"
 
 if not api_key:
     print("API_KEY not found. Ensure GitHub Secrets are set.")
@@ -39,7 +39,7 @@ headers = {
 
 payload = {
     "from": "Acme <onboarding@resend.dev>", # Resend's default testing address
-    "to": ["daniel.sierra@somfy.com"],
+    "to": [receiver_email],
     "subject": "Your Generated Newsletter",
     "html": "<p>Here is the latest automated newsletter attached as a PDF.</p>",
     "attachments": [
