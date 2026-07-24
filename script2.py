@@ -120,7 +120,7 @@ def translate(content):
     for provider in ["DeepInfra", "Together", "Fireworks"]:
         try:
             response = client.chat.completions.create(
-                model="qwen/qwen-2.5-72b-instruct",
+                model="google/gemini-3.5-flash",
                 messages=[
                     {"role": "system", "content": (
                         "You are a translator, you must translate the following text to English.  "
@@ -144,36 +144,10 @@ def translate(content):
             return response.choices[0].message.content.strip()
         except Exception:
             continue
-    return content
+    return "translation failed"
 
 
 
-def transl(content):
-    try:
-        response = client.chat.completions.create(
-            model="qwen/qwen-2.5-72b-instruct",
-            messages=[
-                {
-                    "role": "system",
-                    "content": (
-                        "You are a professional translator. Translate the following text into English. "
-                        "Return ONLY the translated English text, preserving paragraphs. "
-                        "Do not include any conversational filler, preambles, or acknowledgments."
-                    ),
-                },
-                {
-                    "role": "user",
-                    "content": content[:6000], # Truncate to avoid context overflow
-                },
-            ],
-            temperature=0.0,
-            max_tokens=1000,
-        )
-        return response.choices[0].message.content.strip()
-
-    except Exception as e:
-        print(f"Qwen failed: {e}")
-        return "Qwen failed"#content
 #############################################################
 
 # Load, Process, and Save
