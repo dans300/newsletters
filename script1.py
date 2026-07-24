@@ -32,9 +32,9 @@ SITES = [
     #"https://www.batiactu.com/accueil.rss",
     #"https://www.lemoniteur.fr/arc/outboundfeeds/rss/",
    #"https://us14.campaign-archive.com/feed?u=f8bcf676bb27fc2419df09e98&id=c744bdaafe",
-   #"https://bauinfoconsult.de/feed/"
+   "https://bauinfoconsult.de/feed/"
     
-    #"https://www.geb-info.de/rss_feed/geb-rss-feed-meldungen",
+    "https://www.geb-info.de/rss_feed/geb-rss-feed-meldungen",
     "https://www.glaswelt.de/rss_feed/gw-rss-feed-meldungen",
     #"https://www.haustec.de/rss/heizung",
     #"https://us11.campaign-archive.com/feed?u=3c690b345db3823f0db0cac0f&id=bfc8c22a7a",
