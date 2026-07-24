@@ -115,12 +115,12 @@ def clean_article(content):
     return response.choices[0].message.content.strip()
 
 ####translator################################################
-def translat(content):
+def translate(content):
     response = None
     for provider in ["DeepInfra", "Together", "Fireworks"]:
         try:
             response = client.chat.completions.create(
-                model="anthropic/claude-3.5-sonnet",
+                model="qwen/qwen-2.5-72b-instruct",
                 messages=[
                     {"role": "system", "content": (
                         "You are a translator, you must translate the following text to English.  "
@@ -148,7 +148,7 @@ def translat(content):
 
 
 
-def translate(content):
+def transl(content):
     try:
         response = client.chat.completions.create(
             model="qwen/qwen-2.5-72b-instruct",
