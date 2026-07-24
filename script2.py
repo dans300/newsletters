@@ -114,7 +114,38 @@ def clean_article(content):
             continue
     return response.choices[0].message.content.strip()
 
-
+####translator################################################
+def translate(content):
+    response = None
+    for provider in ["DeepInfra", "Together", "Fireworks"]:
+        try:
+            response = client.chat.completions.create(
+                model="anthropic/claude-3.5-sonnet",
+                messages=[
+                    {"role": "system", "content": (
+                        "You are a translator, you must translate the following text to English. if the text is already in English, you must return it as is. "
+                        "Return only the translated text, preserving paragraphs.your output is only whats asked dont say anything else"
+                        "like 'Here is the translated text' or 'The translated article is as follows'."
+                    )},
+                    {"role": "user", "content": content[:6000]}  # truncate to avoid context overflow
+                ],extra_body={
+                "provider": {
+                    "order": [
+                        "DeepInfra",
+                        "Together",
+                        "Fireworks",
+                    ],  # Example preference order
+                    "allow_fallbacks": True,
+                }
+            },
+                temperature=0.0,
+                max_tokens=1000
+            )
+            return response.choices[0].message.content.strip()
+        except Exception:
+            continue
+    return content
+#############################################################
 
 # Load, Process, and Save
 with open("newsletter.json", "r", encoding="utf-8") as file:
@@ -137,14 +168,14 @@ for i, article in enumerate(articles):
         category = default_category
 
     article["category"] = category
-    
+    article["summary"] = translate(article["summary"])  # Translate the summary to English
     # Safely grab the title so the print statement doesn't crash if title is missing
     title = article.get("title", "Untitled")
     print(f"[{category}] {title[:50]}...")
     
     raw_content = article.get("content", "")
     if raw_content:
-        article["clean_content"] = clean_article(raw_content)
+        article["clean_content"] = translate(clean_article(raw_content))
     else:
         article["clean_content"] = ""
 
