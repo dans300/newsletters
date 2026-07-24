@@ -2,7 +2,7 @@ name: News Scraper Pipeline
 
 on:
   schedule:
-    - cron: '55 16 * * 4' 
+    - cron: '15 7 * * *'  # Runs every day at 16:55 UTC (adjust as needed)
   workflow_dispatch:     # Allows manual trigger from GitHub UI
 
 jobs:
