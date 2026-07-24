@@ -115,7 +115,7 @@ def clean_article(content):
     return response.choices[0].message.content.strip()
 
 ####translator################################################
-def translate(content):
+def translat(content):
     response = None
     for provider in ["DeepInfra", "Together", "Fireworks"]:
         try:
@@ -124,7 +124,7 @@ def translate(content):
                 messages=[
                     {"role": "system", "content": (
                         "You are a translator, you must translate the following text to English.  "
-                        "Return only the translated text.your output is only whats asked dont say anything else"
+                        "Return only the translated text in english.your output is only whats asked dont say anything else"
                         "like 'Here is the translated text' or 'The translated article is as follows'."
                     )},
                     {"role": "user", "content": content[:6000]}  # truncate to avoid context overflow
@@ -145,6 +145,35 @@ def translate(content):
         except Exception:
             continue
     return content
+
+
+
+def translate(content):
+    try:
+        response = client.chat.completions.create(
+            model="qwen/qwen-2.5-72b-instruct",
+            messages=[
+                {
+                    "role": "system",
+                    "content": (
+                        "You are a professional translator. Translate the following text into English. "
+                        "Return ONLY the translated English text, preserving paragraphs. "
+                        "Do not include any conversational filler, preambles, or acknowledgments."
+                    ),
+                },
+                {
+                    "role": "user",
+                    "content": content[:6000], # Truncate to avoid context overflow
+                },
+            ],
+            temperature=0.0,
+            max_tokens=1000,
+        )
+        return response.choices[0].message.content.strip()
+
+    except Exception as e:
+        print(f"Qwen failed: {e}")
+        return "Qwen failed"#content
 #############################################################
 
 # Load, Process, and Save
