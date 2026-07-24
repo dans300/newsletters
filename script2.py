@@ -120,7 +120,7 @@ def translate(content):
     for provider in ["DeepInfra", "Together", "Fireworks"]:
         try:
             response = client.chat.completions.create(
-                model="google/gemini-3.5-flash",
+                model="llama-3.1-8b-instruct",
                 messages=[
                     {"role": "system", "content": (
                         "You are a translator, you must translate the following text to English.  "
