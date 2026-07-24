@@ -123,8 +123,8 @@ def translate(content):
                 model="anthropic/claude-3.5-sonnet",
                 messages=[
                     {"role": "system", "content": (
-                        "You are a translator, you must translate the following text to English. if the text is already in English, you must return it as is. "
-                        "Return only the translated text, preserving paragraphs.your output is only whats asked dont say anything else"
+                        "You are a translator, you must translate the following text to English.  "
+                        "Return only the translated text.your output is only whats asked dont say anything else"
                         "like 'Here is the translated text' or 'The translated article is as follows'."
                     )},
                     {"role": "user", "content": content[:6000]}  # truncate to avoid context overflow
