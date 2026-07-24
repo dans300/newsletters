@@ -112,7 +112,10 @@ def clean_article(content):
             break
         except Exception:
             continue
-    return response.choices[0].message.content.strip()
+    try:
+        return response.choices[0].message.content.strip()
+    except Exception:
+        return "unable to retrieve cleaned content"
 
 ####translator################################################
 def translate(content):
@@ -141,10 +144,13 @@ def translate(content):
                 temperature=0.0,
                 max_tokens=1000
             )
-            return response.choices[0].message.content.strip()
+            break
         except Exception:
             continue
-    return "translation failed"
+    try:
+        return response.choices[0].message.content.strip()
+    except Exception:
+        return "translation failed"
 
 
 
