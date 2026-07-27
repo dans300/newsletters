@@ -67,7 +67,7 @@ def get_somfy_category(title, summary):
             continue
     #((((((((((((((((((((((((((()))))))))))))))))))))))))))
     # 🛑 SAFETY GUARD: If all 3 providers failed, don't try to read .choices[0]
-    if not response or not response.choices[0].message.content:
+    if not response :
         return "error"
     
     raw = response.choices[0].message.content.strip()
@@ -142,7 +142,7 @@ def translate(content):
     try:
         return response.choices[0].message.content.strip()
     except Exception:
-        return "translation failed"
+        return "* " + content#translation failed, returning original content with asterisk to indicate failure
 
 
 
