@@ -67,8 +67,8 @@ def get_somfy_category(title, summary):
             continue
     #((((((((((((((((((((((((((()))))))))))))))))))))))))))
     # 🛑 SAFETY GUARD: If all 3 providers failed, don't try to read .choices[0]
-    if not response or not hasattr(response, 'choices') or not response.choices:
-        return "others"
+    if not response or not response.choices[0].message.content:
+        return "error"
     
     raw = response.choices[0].message.content.strip()
   
@@ -119,7 +119,7 @@ def translate(content):
     for provider in ["DeepInfra", "Together", "Fireworks"]:
         try:
             response = client.chat.completions.create(
-                model="llama-3.1-8b-instruct",
+                model="meta-llama/llama-3.1-8b-instruct",
                 messages=[
                     {"role": "system", "content": (
                         "You are a translator, you must translate the following text to English.  "
