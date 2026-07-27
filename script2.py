@@ -98,11 +98,7 @@ def clean_article(content):
                     {"role": "user", "content": content[:6000]}  # truncate to avoid context overflow
                 ],extra_body={
                 "provider": {
-                    "order": [
-                        "DeepInfra",
-                        "Together",
-                        "Fireworks",
-                    ],  # Example preference order
+                    "order":[ provider ],  # Example preference order
                     "allow_fallbacks": True,
                 }
             },
@@ -133,11 +129,7 @@ def translate(content):
                     {"role": "user", "content": content[:6000]}  # truncate to avoid context overflow
                 ],extra_body={
                 "provider": {
-                    "order": [
-                        "DeepInfra",
-                        "Together",
-                        "Fireworks",
-                    ],  # Example preference order
+                   "order":[ provider ],  # Example preference order
                     "allow_fallbacks": True,
                 }
             },
