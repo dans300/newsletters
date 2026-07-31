@@ -28,6 +28,7 @@ app = Firecrawl(api_key="fc-3840d2d759ba4fc780bdbe2cf53ddfa5")
 #GITHUB fc-0647e8554d984502b02fcb4e59109672
 #somfy fc-c925bfee660343c4af8349e197605baf
 #UDEA fc-3218cf41b6364aa29841b43267cfaf71
+
 SITES = [  
     #"https://www.batiactu.com/accueil.rss",
     "https://www.lemoniteur.fr/arc/outboundfeeds/rss/",

@@ -68,7 +68,7 @@ def get_somfy_category(title, summary):
     #((((((((((((((((((((((((((()))))))))))))))))))))))))))
     # 🛑 SAFETY GUARD: If all 3 providers failed, don't try to read .choices[0]
     if not response :
-        return "error"
+        return "others"
     
     raw = response.choices[0].message.content.strip()
   
