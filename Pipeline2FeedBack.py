@@ -150,7 +150,7 @@ def classify_with_review(title: str, summary: str) -> tuple[str, int]:
 
 
 # ── Load, Process, Save ────────────────────────────────────────────────────────
-with open("newsletter.json", "r", encoding="utf-8") as file:
+with open("jsons/newsletter14.json", "r", encoding="utf-8") as file:
     articles = json.load(file)
 
 print(f"Classifying {len(articles)} articles with {DOER_MODEL} (doer) + {CRITIC_MODEL} (critic)…\n")
@@ -165,10 +165,10 @@ for i, article in enumerate(articles, 1):
     rounds_label = f"{rounds}r" if rounds > 1 else "✓"
     print(f"[{rounds_label}] [{category}] {title[:60]}…")
 
-with open("articles_classified.json", "w", encoding="utf-8") as file:
+with open("FEEDBACKclassification.json", "w", encoding="utf-8") as file:
     json.dump(articles, file, indent=2, ensure_ascii=False)
 
-print("\n--- Processing Complete: 'articles_classified.json' is ready. ---\n")
+print("\n--- Processing Complete: 'FEEDBACKclassification.json' is ready. ---\n")
 
 
 # ── PDF Generation (unchanged) ────────────────────────────────────────────────
@@ -194,7 +194,7 @@ style_url       = ParagraphStyle("url",       fontSize=8,  fontName="Helvetica-O
 style_summary   = ParagraphStyle("summary",   fontSize=10, fontName="Helvetica",      textColor=colors.HexColor("#333333"), spaceAfter=4, leading=16)
 style_back      = ParagraphStyle("back",      fontSize=9,  fontName="Helvetica-Oblique", textColor=colors.HexColor("#2980B9"), spaceAfter=12, spaceBefore=10)
 
-sites     = list(dict.fromkeys(a["site"].replace("https://www.", "").replace("/", "").split(".")[0].capitalize() for a in articles if "site" in a))
+sites     = list(dict.fromkeys(a["url"].replace("https://www.", "").replace("/", "").split(".")[0].capitalize() for a in articles if "url" in a))
 title_text = " | ".join(sites)
 file_name  = title_text.replace(" | ", "") + " " + today + ".pdf"
 

@@ -32,6 +32,7 @@ app = Firecrawl(api_key=os.getenv("FIRE_CRAWL"))
 #brandon api fc-5be3e611cd87485e9e703556a4522f78
 #GITHUB fc-0647e8554d984502b02fcb4e59109672
 #daniel.sierra@somfy fc-c925bfee660343c4af8349e197605baf
+#open router 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
 
 def valid_intermpresas(days=60,which="PS"):
     today = date.today()
