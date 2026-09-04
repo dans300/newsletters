@@ -20,15 +20,15 @@ client = OpenAI(base_url="http://localhost:11434/v1", api_key="ollama")
 name="gemma3:4b"
 def get_somfy_category(title, summary):
     system_instruction = ("You are a master classifier for a construction news dashboard. "
-        " Assign each article with one word following the following logic:"
-          "if the article talks about anything related to money or the market itself but not a specific company assign the word (Financial) to the article, else "
-          "if the article talks about anything a corporate desition where a product is not involved,assign the word (corporate) to the article, else"
-          "if the article talks about anything related to Law check if its a law or a sanction and assign whichever of the two it is either (regulation) or (sanction) to the article , else"
-          "if the article talks about anything related to construction check if its residental or non residential and assign whichever of the two it is either (residential) or (non-residential) to the article , else"
-          "if the artcile talks about anything related to a technology or product assign the word (technology) to the article, else"
-          "if the artcile talks about anything related to special or extraordinary events assign the word (events) to the article.if the article wasnt assigned to any of the former categories then assign the word (others) to it."
-          "Follow these rules: NEVER create new categories and every article must"
-        "be classified to one and only one word in (Financial), (corporate),(regulation), (sanction), (residential), (non-residential),  (technology),(events), (others)."
+                       " Assign each article with one word following the following logic:"
+                         "if the article talks about anything a corporate decision where a product is not involved,assign the word (corporate) to the article, else"
+                         "if the article talks about anything related to Law check if its a law assign the word (regulation) to the article , else"
+                         "if the article talks about anything related to construction check if its residential -> housing: homes, apartments, social housing, student housing OR non-residential meaning everything else built: offices, retail, warehouses, "
+                         "hotels, hospitals, schools, roads, infrastructure and finally assign whichever of the two it is either (residential) or (non-residential) to the article , else"
+                         "if the artcile talks about anything related to a technology or product assign one word from [Access Control, Closures, Window, Glazing, Ventilation, Heating, Air conditioning, Lighting, Sun Shading] to the article, else"
+                         "if the artcile talks about anything related to special or extraordinary events assign the word (events) to the article.if the article wasnt assigned to any of the former categories then assign the word (others) to it."
+                         "Follow these rules: NEVER create new categories and every article must"
+                       "be classified to one and only one word in (corporate),(regulation), (residential), (non-residential),  (Access Control), (Closures), (Window), (Glazing), (Ventilation), (Heating), (Air conditioning), (Lighting), (Sun Shading),(events), (others)."
     )                                               
    
     prompt = f"Title: {title}\nSummary: {summary}\n\nCategory:"
@@ -48,7 +48,11 @@ def get_somfy_category(title, summary):
     
     raw = response.choices[0].message.content.strip()
   
-    allowed = ["Financial", "corporate","regulation", "sanction", "residential", "non-residential",  "technology","events", "others"]
+    allowed = ["corporate", "regulation",
+                "residential", "non-residential",
+                "Access Control", "Closures", "Window", "Glazing", "Ventilation",
+                "Heating", "Air conditioning", "Lighting", "Sun Shading",
+                "events", "others"]
     for word in allowed:
         if word.lower() in raw.lower():
             return word

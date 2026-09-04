@@ -31,14 +31,14 @@ app = Firecrawl(api_key="fc-3840d2d759ba4fc780bdbe2cf53ddfa5")
 
 SITES = [  
     #"https://www.batiactu.com/accueil.rss",
-    "https://www.lemoniteur.fr/arc/outboundfeeds/rss/",
-   "https://us14.campaign-archive.com/feed?u=f8bcf676bb27fc2419df09e98&id=c744bdaafe",
+    #"https://www.lemoniteur.fr/arc/outboundfeeds/rss/",
+   #"https://us14.campaign-archive.com/feed?u=f8bcf676bb27fc2419df09e98&id=c744bdaafe",
    #"https://bauinfoconsult.de/feed/"
     
     #"https://www.geb-info.de/rss_feed/geb-rss-feed-meldungen",
     #"https://www.glaswelt.de/rss_feed/gw-rss-feed-meldungen",
     #"https://www.haustec.de/rss/heizung",
-    #"https://us11.campaign-archive.com/feed?u=3c690b345db3823f0db0cac0f&id=bfc8c22a7a",
+    "https://us11.campaign-archive.com/feed?u=3c690b345db3823f0db0cac0f&id=bfc8c22a7a"
     #"https://www.kunststoffweb.de/rss/" 
     #"https://www.avproglobal.com/blogs/news/tagged/avpro-global.atom"
          
@@ -93,8 +93,9 @@ for base_url in SITES:
 
     
     #---------------------------------------------------------------------------------------------
-    
-
+    print("THIS SHIT-------------------------------------------------------------------------------")
+    print(articles_raw)
+    print("THIS SHIT-------------------------------------------------------------------------------")
     # Step 2: Scrape each article and generate a 3-line summary
     for article in articles_raw:
         url = article.get("url", "")

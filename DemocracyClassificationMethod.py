@@ -16,26 +16,30 @@ def get_somfy_category2(title, summary):
     PROVIDERS = ["Together", "Fireworks", "DeepInfra"]
 
     ALLOWED = [
-         "corporate", "regulation", "sanction",
+        "corporate", "regulation",
         "residential", "non-residential",
         "Access Control", "Closures", "Window", "Glazing", "Ventilation",
         "Heating", "Air conditioning", "Lighting", "Sun Shading",
-        "events", "others",
+        "events", "others" 
     ]
 
     system_instruction = (
-        "You are a master classifier for a construction news dashboard. "
-                   " Assign each article with one word following the following logic:"
-                     #"if the article talks about anything related to money or the market itself but not a specific company assign the word (Financial) to the article, else "
-                     "if the article talks about anything a corporate decision where a product is not involved,assign the word (corporate) to the article, else"
-                     "if the article talks about anything related to Law check if its a law or a sanction and assign whichever of the two it is either (regulation) or (sanction) to the article , else"
-                     "if the article talks about anything related to construction check if its residential -> housing: homes, apartments, social housing, student housing OR non-residential meaning everything else built: offices, retail, warehouses, "
-                     "hotels, hospitals, schools, roads, infrastructure and finally assign whichever of the two it is either (residential) or (non-residential) to the article , else"
-                     "if the artcile talks about anything related to a technology or product assign one word from [Access Control, Closures, Window, Glazing, Ventilation, Heating, Air conditioning, Lighting, Sun Shading] to the article, else"
-                     "if the artcile talks about anything related to special or extraordinary events assign the word (events) to the article.if the article wasnt assigned to any of the former categories then assign the word (others) to it."
-                     "Follow these rules: NEVER create new categories and every article must"
-                   "be classified to one and only one word in (corporate),(regulation), (sanction), (residential), (non-residential),  (Access Control), (Closures), (Window), (Glazing), (Ventilation), (Heating), (Air conditioning), (Lighting), (Sun Shading),(events), (others)."
-    )
+            "You are a master classifier for a construction news dashboard. "
+                       " Assign each article with one word following the following logic:"
+                         "if the article talks about anything a corporate decision where a product is not involved,assign the word (corporate) to the article, else"
+                         "if the article talks about anything related to Law check if its a law assign the word (regulation) to the article , else"
+                         "if the article talks about anything related to construction check if its residential -> housing: homes, apartments, social housing, student housing OR non-residential meaning everything else built: offices, retail, warehouses, "
+                         "hotels, hospitals, schools, roads, infrastructure and finally assign whichever of the two it is either (residential) or (non-residential) to the article , else"
+                         "if the artcile talks about anything related to a technology or product assign one word from [Access Control, Closures, Window, Glazing, Ventilation, Heating, Air conditioning, Lighting, Sun Shading] to the article, else"
+                         "if the artcile talks about anything related to special or extraordinary events assign the word (events) to the article.if the article wasnt assigned to any of the former categories then assign the word (others) to it."
+                         "Follow these rules: NEVER create new categories and every article must"
+                       "be classified to one and only one word in (corporate),(regulation), (residential), (non-residential),  (Access Control), (Closures), (Window), (Glazing), (Ventilation), (Heating), (Air conditioning), (Lighting), (Sun Shading),(events), (others)."
+            "\n\nOUTPUT FORMAT: reply with TWO categories from that list, comma-separated, "
+            "nothing else. The first is the category the logic above gives. The second is "
+            "the category you would pick if the first one did not exist. "
+            "Do not explain. Do not add any other words.\n"
+            "Example: Lighting, Closures"
+        )
     prompt = f"Title: {title}\nSummary: {summary}"
 
     # ── helpers ───────────────────────────────────────────────────────────────

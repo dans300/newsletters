@@ -6,7 +6,7 @@ from reportlab.lib import colors
 from datetime import date, timedelta
 import requests, urllib3
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
-
+import os
 
 
 ssl._create_default_https_context = ssl._create_unverified_context
@@ -25,7 +25,7 @@ import json
 from firecrawl import Firecrawl
 
 
-import os
+
 
 app = Firecrawl(api_key=os.getenv("FIRE_CRAWL"))
 #groupsomfy fc-3840d2d759ba4fc780bdbe2cf53ddfa5

@@ -1,0 +1,49 @@
+name: Version3-Firecrawl 
+
+on:
+  schedule:
+    - cron: '0 0 10 8 *'
+    - cron: '0 0 17 8 *'
+  workflow_dispatch:
+
+jobs:
+  run-pipeline:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          ls -la
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Run scripts and isolate outputs
+        env:
+          FIRECRAWL_API_KEY: ${{ secrets.FIRE_CRAWL }}
+          SEND_KEY: ${{ secrets.SEND_KEY }}
+        run: |
+          mkdir -p hidden_old_pdfs
+          mv *.pdf hidden_old_pdfs/ 2>/dev/null || true
+
+          python oneBigSolution.py
+
+          mkdir -p output
+
+          mv newsletter.json output/
+          mv *.pdf output/
+
+          python send_email.py
+
+      - name: Save output folder
+        uses: actions/upload-artifact@v4
+        with:
+          name: my-scraper-files
+          path: output/
