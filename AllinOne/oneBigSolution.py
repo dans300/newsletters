@@ -64,7 +64,7 @@ SITES = [
     #"https://bauinfoconsult.de/feed/" ,
     #"https://www.geb-info.de/rss_feed/geb-rss-feed-meldungen",
     "https://www.haustec.de/rss/heizung",
-    "https://us11.campaign-archive.com/feed?u=3c690b345db3823f0db0cac0f&id=bfc8c22a7a"
+    "https://us11.campaign-archive.com/feed?u=3c690b345db3823f0db0cac0f&id=bfc8c22a7a",
     "https://www.kunststoffweb.de/rss/",
     "https://www.cepro.com/feed/",
     "http://feeds.feedburner.com/SecuritySalesIntegration",
