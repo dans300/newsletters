@@ -41,7 +41,7 @@ payload = {
     "from": "Acme <onboarding@resend.dev>", # Resend's default testing address
     "to": [receiver_email],
     "subject": "Your Generated Newsletter",
-    "html": "<p> this is the newsletter with the prompt word-universe we changed and a newly improved classifier ,feedback is much appreciated! best regards.  -Daniel SIERRA</p>",
+    "html": "<p> this is the newsletter VERSION3 where FIRECRAWL does everything ,the aesthetic was improved too ,this is just a test with 5 sources because of the high firecrawl credits consumption,feedback is much appreciated! best regards.  -Daniel SIERRA</p>",
     "attachments": [
         {
             "filename": attachment_name,
