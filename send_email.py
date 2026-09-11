@@ -41,7 +41,7 @@ payload = {
     "from": "Acme <onboarding@resend.dev>", # Resend's default testing address
     "to": [receiver_email],
     "subject": "Your Generated Newsletter",
-    "html": "<p> this is the newsletter VERSION3 where FIRECRAWL does everything ,u see it daniel?,feedback is much appreciated! best regards.  -Daniel SIERRA</p>",
+    "html": "<p> this is the newsletter VERSION3 where FIRECRAWL does everything ,this is also the final version.There are only 6 of the sources included because of the high firecrawl credits consumption.Finally , this particular email and pdf-newsletter-compilation was generated on the cloud where i configured the project to be so it is independently run ,automatically, whenever we want during the month.Feedback is much appreciated! Best regards.  -Daniel SIERRA</p>",
     "attachments": [
         {
             "filename": attachment_name,
