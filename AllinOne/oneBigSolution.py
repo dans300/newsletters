@@ -17,7 +17,7 @@ import urllib3
 import time as time_module
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 ssl._create_default_https_context = ssl._create_unverified_context
-
+import os
 
 
 import requests
