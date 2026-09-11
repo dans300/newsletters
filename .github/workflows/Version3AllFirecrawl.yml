@@ -33,7 +33,7 @@ jobs:
           mkdir -p hidden_old_pdfs
           mv *.pdf hidden_old_pdfs/ 2>/dev/null || true
 
-          python oneBigSolution.py
+          python AllinOne/oneBigSolution.py
 
           mkdir -p output
 
