@@ -1,15 +1,18 @@
+import site
 import ssl
+from datetime import date, time, timedelta
+import feedparser
 from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, PageBreak
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib.pagesizes import letter
 from reportlab.lib import colors
-
-
-
+import requests
+import urllib3
+import time as time_module
+urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 ssl._create_default_https_context = ssl._create_unverified_context
 
-import urllib3
-urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+
 
 import requests
 _orig = requests.Session.request
@@ -29,21 +32,39 @@ app = Firecrawl(api_key="fc-3840d2d759ba4fc780bdbe2cf53ddfa5")
 #somfy fc-c925bfee660343c4af8349e197605baf
 #UDEA fc-3218cf41b6364aa29841b43267cfaf71
 
-SITES = [  
-    #"https://www.batiactu.com/accueil.rss",
-    #"https://www.lemoniteur.fr/arc/outboundfeeds/rss/",
-   #"https://us14.campaign-archive.com/feed?u=f8bcf676bb27fc2419df09e98&id=c744bdaafe",
-   #"https://bauinfoconsult.de/feed/"
-    
-    #"https://www.geb-info.de/rss_feed/geb-rss-feed-meldungen",
-    #"https://www.glaswelt.de/rss_feed/gw-rss-feed-meldungen",
-    #"https://www.haustec.de/rss/heizung",
-    "https://us11.campaign-archive.com/feed?u=3c690b345db3823f0db0cac0f&id=bfc8c22a7a"
-    #"https://www.kunststoffweb.de/rss/" 
-    #"https://www.avproglobal.com/blogs/news/tagged/avpro-global.atom"
-         
-          ]
 
+CATEGORY_MAP = {
+    "ps": "Protección Solar",
+    "cv": "Cerramientos y Ventana",
+    "pa": "Puertas y Automatismos",
+}
+
+def build_interempresas(code, days=60, needs_firecrawl=False):
+    name = CATEGORY_MAP.get(code.lower())
+    today = date.today()
+    for i in range(days):
+        dt = today - timedelta(days=i)
+        url = f"https://www.interempresas.net/Boletin/NL/{dt.year:04d}/{dt.month:02d}/{dt.day:02d}/{code}.html"
+        try:
+            r = requests.get(url, headers={"User-Agent": "Mozilla/5.0"}, timeout=10, verify=False)
+            valid = r.status_code == 200 and "Ruta de acceso no encontrada" not in r.text and len(r.text.strip()) > 80
+        except Exception:
+            valid = False
+        if valid:
+            return {"rss": False,"name": name, "feed_url": url, "needs_firecrawl": needs_firecrawl}
+    return {"rss": False,"name": name, "feed_url": None, "needs_firecrawl": needs_firecrawl}
+
+SITES  = [
+        {"rss": True,"name": "Security and sales", "feed_url": "http://feeds.feedburner.com/SecuritySalesIntegration", "needs_firecrawl": False}, 
+        {"rss": True,"name": "GEB", "feed_url": "https://www.geb-info.de/rss_feed/geb-rss-feed-meldungen", "needs_firecrawl": False}, 
+        {"rss": True,"name": "Glaswelt", "feed_url": "https://www.glaswelt.de/rss_feed/gw-rss-feed-meldungen", "needs_firecrawl": False}, 
+        {"rss": True,"name": "Haustec", "feed_url": "https://www.haustec.de/rss/heizung", "needs_firecrawl": False}, 
+        {"rss": True,"name": "WindowVision", "feed_url": "https://www.wf-vision.com/feed/", "needs_firecrawl": True} 
+]
+
+
+SITES.extend(build_interempresas(code,needs_firecrawl=True) for code in ["PS"] )#PA,CV,PS
+print(SITES)
 results = []
 
 
@@ -67,37 +88,61 @@ ARTICLE_SCHEMA = {
 },
 "required": ["articles"]
 }
+        
 
-for base_url in SITES:
-    print(f"\n--- Scraping {base_url} ---")
+def get_articles_from_rss(feed_url, needs_firecrawl=False):
+    if needs_firecrawl:
+        try:
+            result = app.scrape(feed_url, formats=["rawHtml"], proxy="enhanced",max_age=0)
+            xml = result.raw_html if hasattr(result, "raw_html") else result.rawHtml
+        except Exception as e:
+                print(f"⚠ Skipped site {feed_url}: {e}")
+    else:
+        headers = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"}
+        xml = requests.get(feed_url, headers=headers).text
 
+    feed = feedparser.parse(xml)
+    print(f"{len(feed.entries)} articles from {feed_url}")
+    return [{"title": e.title, "url": e.link} for e in feed.entries]
+
+
+
+def get_articles_from_site(base_url):
     try:
         homepage = app.scrape(
             base_url,
             formats=[{
                 "type": "json",
                 "schema": ARTICLE_SCHEMA,
-                "prompt": "Extract all news articles visible on the page,each with title url and a 2 line summary ,all translated to English."
-            }]
+                "prompt": "Extract all the articles on the page, each with title url and a 2 line summary, all translated to English."
+            }],
+            only_main_content=False,
+            max_age=0
         )
         data = homepage.json
+        print(f"{len(data.get('articles', []))} articles from {base_url}")
         if isinstance(data, dict):
-            articles_raw = data.get("articles", [])
+            return data.get("articles", [])
         elif isinstance(data, list):
-            articles_raw = data
+            return data
         else:
-            articles_raw = []
+            return []
     except Exception as e:
         print(f"⚠ Skipped site {base_url}: {e}")
-        continue
+        return []
 
-    
-    #---------------------------------------------------------------------------------------------
-    print("THIS SHIT-------------------------------------------------------------------------------")
-    print(articles_raw)
-    print("THIS SHIT-------------------------------------------------------------------------------")
+
+for site in SITES:    
+    # step 1---------get the articles--------------------------------------------------------------
+    if site.get("rss"):
+        print("camino RSS")
+        articles_raw = get_articles_from_rss(site["feed_url"], site["needs_firecrawl"])
+    else:
+        print("camino Normal")
+        articles_raw = get_articles_from_site(site["feed_url"])
     # Step 2: Scrape each article and generate a 3-line summary
     for article in articles_raw:
+        time_module.sleep(5)#rate limits apply 
         url = article.get("url", "")
         title = article.get("title", "")
 
@@ -115,12 +160,12 @@ for base_url in SITES:
             summary = page.json.get("summary", "") if page.json else ""
             print(page.markdown[:200])
         except Exception as e:
-            print(f"⚠ Skipped {url}: {e}")
+            print(f"⚠ unable to summarize {url}: {e}")
             continue
 
         
         results.append({
-    "site": base_url,
+    "site": site["name"],
     "title": title,
     "url": url,
     "summary": summary,

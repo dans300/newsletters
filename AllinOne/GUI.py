@@ -1,4 +1,3 @@
-
 from collections import defaultdict
 import json
 from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, PageBreak, HRFlowable
@@ -24,7 +23,7 @@ from collections import Counter
 import re
 today = date.today().strftime("%B %d, %Y")
 
-with open("articles_classified.json", "r", encoding="utf-8") as file:
+with open("lesArticles.json", "r", encoding="utf-8") as file:
     articles = json.load(file)
 
 bad = [a for a in articles if '"' in a.get("url", "")]
@@ -154,22 +153,12 @@ SITE_OVERRIDES = {
     "wsj.com": "WSJ",
 }
 
-def strip_scheme(u):
-    return u.split("://", 1)[-1]
+
 
 def get_site_name(url):
-    netloc = urlparse(url).netloc.lower()
-    if netloc.startswith("www."):
-        netloc = netloc[4:]
-    for key, name in SITE_OVERRIDES.items():
-        if key.startswith("http"):
-            if strip_scheme(url) == strip_scheme(key):
-                return name
-        elif netloc.endswith(key):
-            return name
-    return netloc.split('.')[-2].capitalize()
+    return next(d.get("name") for d in SITES if d.get("feed_url") == url)
 
-sites = list(dict.fromkeys(get_site_name(a["site"]) for a in articles if "site" in a))
+sites = list(dict.fromkeys(get_site_name(a.get("feed_url")) for a in SITES))
 title_text = " | ".join(sites)
 file_name = title_text.replace(" | ", "") + " " + today + ".pdf"
 
@@ -182,6 +171,9 @@ style_cover = ParagraphStyle("cover", fontSize=_size, leading=_size * 1.2,
 style_cover_big = ParagraphStyle("cover_big", fontSize=32, leading=38, fontName=HEAD,
                                  textColor=INK, spaceAfter=6)
 
+
+style_footer_link = ParagraphStyle("footer_link", fontSize=10, fontName=BODY_BOLD, textColor=ACCENT, alignment=TA_RIGHT)
+back_to_top_flowable = Paragraph('<a href="#top" color="#C1440E">▲ Top</a>', style_footer_link)
 # ── Category ordering ─────────────────────────────────────────────────────────
 PRODUCT_CATS = ["Access Control", "Closures", "Window", "Glazing", "Ventilation",
                 "Heating", "Air conditioning", "Lighting", "Sun Shading"]
@@ -200,31 +192,44 @@ def label(cat):
 
 _grouped_names = {c for _, members in GROUPS for c in members}
 
-top_cats = sorted([c for c in categories if c not in _grouped_names], key=str.lower)
+top_cats = sorted(
+    [c for c in categories if c not in _grouped_names and c.lower() != "others"],
+    key=str.lower
+)
+others_cat = next((c for c in categories if c.lower() == "others"), None)
+
+
 group_cats = [(heading, sorted([c for c in categories if c in members], key=str.lower))
               for heading, members in GROUPS]
 group_cats = [(heading, members) for heading, members in group_cats if members]
 
 ordered_cats = top_cats + [c for _, members in group_cats for c in members]
+if others_cat:
+    ordered_cats.append(others_cat)
 
 # ── Page furniture ────────────────────────────────────────────────────────────
 def page_footer(canvas, doc_):
     canvas.saveState()
     if canvas.getPageNumber() > 1:
         canvas.setFont(BODY, 8)
-        canvas.setFillColor(MUTED)
         page_no = str(canvas.getPageNumber())
         right_x = letter[0] - inch
-        room = (right_x - inch) - canvas.stringWidth(page_no, BODY, 8) - 18
 
+        
+        arrow_w = canvas.stringWidth("\u25B2 Top", BODY_BOLD, 10) + 4
+        back_to_top_flowable.wrap(arrow_w, 0.3 * inch)
+        back_to_top_flowable.drawOn(canvas, right_x - arrow_w, 0.58 * inch)
+
+        room = (right_x - arrow_w - 10 - inch) - canvas.stringWidth(page_no, BODY, 8) - 18
         footer_fs = 8.0
         while footer_fs > 5.0 and canvas.stringWidth(title_text, BODY, footer_fs) > room:
             footer_fs -= 0.25
 
         canvas.setFont(BODY, footer_fs)
+        canvas.setFillColor(MUTED)
         canvas.drawString(inch, 0.62 * inch, title_text)
         canvas.setFont(BODY, 8)
-        canvas.drawRightString(letter[0] - inch, 0.62 * inch, str(canvas.getPageNumber()))
+        canvas.drawRightString(right_x - arrow_w - 10, 0.62 * inch, page_no)
         canvas.setStrokeColor(HAIRLINE)
         canvas.setLineWidth(0.5)
         canvas.line(inch, 0.8 * inch, letter[0] - inch, 0.8 * inch)
@@ -296,6 +301,12 @@ def _build_toc(font_size, pad):
                          Paragraph(str(len(grouped[cat])), style_toc_count)])
             row_styles.append(("LINEBELOW", (0, len(rows) - 1), (-1, len(rows) - 1), 0.5, HAIRLINE))
 
+    if others_cat:
+        anchor = others_cat.replace(" ", "_").replace("&", "and")
+        rows.append([Paragraph(f'<a href="#{anchor}" color="#14213D">{esc(label(others_cat))}</a>', style_toc_link),
+                        Paragraph(str(len(grouped[others_cat])), style_toc_count)])
+        row_styles.append(("LINEBELOW", (0, len(rows) - 1), (-1, len(rows) - 1), 0.5, HAIRLINE))
+
     table = Table(rows, colWidths=[5.0 * inch, 1.5 * inch])
     table.setStyle(TableStyle([
         ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
@@ -332,7 +343,7 @@ for cat in ordered_cats:
     story.append(rule(ACCENT, 1.5, space_after=2))
 
     for i, article in enumerate(grouped[cat]):
-        site_label = get_site_name(article["site"]) if article.get("site") else ""
+        site_label = article["site"] 
         story.append(Paragraph(
             f'<a name="sum_{article["anchor_id"]}"/>'
             f'<a href="#full_{article["anchor_id"]}" color="#14213D">{esc(article["title"])}</a>',
@@ -344,7 +355,7 @@ for cat in ordered_cats:
         if i < count - 1:
             story.append(rule())
 
-    story.append(Paragraph('<a href="#top" color="#C1440E">↑ Back to contents</a>', style_back))
+    
     story.append(PageBreak())
 
 # ── Full articles ─────────────────────────────────────────────────────────────
@@ -358,13 +369,11 @@ for article in articles:
         if current_site is not None:
             story.append(PageBreak())
         current_site = article["site"]
-        story.append(Paragraph(esc(get_site_name(current_site)), style_site))
+        story.append(Paragraph(esc(current_site), style_site))
         story.append(rule(ACCENT, 1.5, space_after=6))
 
     story.append(Paragraph(
-        f'<a name="full_{article["anchor_id"]}"/>'
-        f'<a href="#sum_{article["anchor_id"]}" color="#14213D">{esc(article["title"])}</a>',
-        style_title))
+        f'<a name="full_{article["anchor_id"]}"/>{esc(article["title"])}',style_title))
     story.append(Paragraph(
         f'<a href="{safe_url(article["url"])}" color="#6B7280">{esc(article["url"][:90])}</a>', style_meta))
 
@@ -379,3 +388,5 @@ for article in articles:
 doc.build(story, onFirstPage=page_footer, onLaterPages=page_footer)
 print(f"PDF saved to {file_name}")
 print(str("this is the NEW GUI"))
+
+

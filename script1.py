@@ -3,7 +3,7 @@ from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, PageBreak
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib.pagesizes import letter
 from reportlab.lib import colors
-from datetime import date, timedelta
+from datetime import date, time, timedelta
 import requests, urllib3
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 import os
@@ -23,7 +23,6 @@ requests.Session.request = _no_verify
 
 import json
 from firecrawl import Firecrawl
-
 
 
 
@@ -107,8 +106,8 @@ for base_url in SITES:
             formats=[{
                 "type": "json",
                 "schema": ARTICLE_SCHEMA,
-                "prompt": "Extract all news articles visible on the page,each with title url and a 2 line summary ,all translated to English."
-            }]
+                "prompt": "Extract all the articles  on the page,each with title url and a 2 line summary ,all translated to English."
+            }],only_main_content=False, max_age=0#,wait_for=5000,timeout=60000
         )
         data = homepage.json
         if isinstance(data, dict):
@@ -129,7 +128,7 @@ for base_url in SITES:
     for article in articles_raw:
         url = article.get("url", "")
         title = article.get("title", "")
-
+        
         if not url or not url.startswith("http"):
             continue
         try:

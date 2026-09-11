@@ -1,23 +1,24 @@
-import ssl
-from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, PageBreak
-from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
-from reportlab.lib.pagesizes import letter
-from reportlab.lib import colors
-from datetime import date, timedelta
-import requests, urllib3
-urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
-import os
-
 """
 get_somfy_category 
 get_somfy_category2 el de democracy
 get_somfy_category3 es firecrawl que lo hace 
 """ 
 
+import site
+import ssl
+from datetime import date, time, timedelta
+import feedparser
+from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, PageBreak
+from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+from reportlab.lib.pagesizes import letter
+from reportlab.lib import colors
+import requests
+import urllib3
+import time as time_module
+urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 ssl._create_default_https_context = ssl._create_unverified_context
 
-import urllib3
-urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+
 
 import requests
 _orig = requests.Session.request
@@ -30,50 +31,47 @@ import json
 from firecrawl import Firecrawl
 
 
-
-
-app = Firecrawl(api_key="fc-c925bfee660343c4af8349e197605baf")
+app = Firecrawl(api_key=os.getenv("FIRE_CRAWL"))
 #groupsomfy fc-3840d2d759ba4fc780bdbe2cf53ddfa5
 #brandon api fc-5be3e611cd87485e9e703556a4522f78
 #GITHUB fc-0647e8554d984502b02fcb4e59109672
-#daniel.sierra@somfy fc-c925bfee660343c4af8349e197605baf
-#open router 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
+#somfy fc-c925bfee660343c4af8349e197605baf
+#UDEA fc-3218cf41b6364aa29841b43267cfaf71
 
-def valid_intermpresas(days=60,which="PS"):
+
+CATEGORY_MAP = {
+    "ps": "Protección Solar",
+    "cv": "Cerramientos y Ventana",
+    "pa": "Puertas y Automatismos",
+}
+
+def build_interempresas(code, days=60, needs_firecrawl=False):
+    name = CATEGORY_MAP.get(code.lower())
     today = date.today()
     for i in range(days):
         dt = today - timedelta(days=i)
-        url = f"https://www.interempresas.net/Boletin/NL/{dt.year:04d}/{dt.month:02d}/{dt.day:02d}/"+which+".html"
+        url = f"https://www.interempresas.net/Boletin/NL/{dt.year:04d}/{dt.month:02d}/{dt.day:02d}/{code}.html"
         try:
-            r = requests.get(url, headers={"User-Agent":"Mozilla/5.0"}, timeout=10, verify=False)
+            r = requests.get(url, headers={"User-Agent": "Mozilla/5.0"}, timeout=10, verify=False)
             valid = r.status_code == 200 and "Ruta de acceso no encontrada" not in r.text and len(r.text.strip()) > 80
-        except:
+        except Exception:
             valid = False
         if valid:
-            return url
-        #else:
-        #    print("Invalid:", url)
-    return None
+            return {"rss": False,"name": name, "feed_url": url, "needs_firecrawl": needs_firecrawl}
+    return {"rss": False,"name": name, "feed_url": None, "needs_firecrawl": needs_firecrawl}
+
+SITES  = [
+
+        {"rss": True,"name": "Security and sales", "feed_url": "http://feeds.feedburner.com/SecuritySalesIntegration", "needs_firecrawl": False}, 
+        {"rss": True,"name": "GEB", "feed_url": "https://www.geb-info.de/rss_feed/geb-rss-feed-meldungen", "needs_firecrawl": False}, 
+        {"rss": True,"name": "Glaswelt", "feed_url": "https://www.glaswelt.de/rss_feed/gw-rss-feed-meldungen", "needs_firecrawl": False}, 
+        #{"rss": True,"name": "Haustec", "feed_url": "https://www.haustec.de/rss/heizung", "needs_firecrawl": False}, 
+        {"rss": True,"name": "WindowVision", "feed_url": "https://www.wf-vision.com/feed/", "needs_firecrawl": True} 
+]
 
 
-
-SITES = [  
-    #"https://www.batiactu.com/accueil.rss",
-    #"https://technicbaie.fr/",
-    #"https://www.lemoniteur.fr/arc/outboundfeeds/rss/",
-    #"https://bauinfoconsult.de/feed/" ,
-    #"https://www.geb-info.de/rss_feed/geb-rss-feed-meldungen",
-    "https://www.haustec.de/rss/heizung",
-    "https://us11.campaign-archive.com/feed?u=3c690b345db3823f0db0cac0f&id=bfc8c22a7a",
-    "https://www.kunststoffweb.de/rss/",
-    "https://www.cepro.com/feed/",
-    "http://feeds.feedburner.com/SecuritySalesIntegration",
-    "https://www.wf-vision.com/feed/"         
-          ]
-#do we want indtermpresas? if so, uncomment the following lines
-#SITES.append(valid_intermpresas(60,"PS"))
-#SITES.append(valid_intermpresas(60,"CV"))
-#SITES.append(valid_intermpresas(60,"PA"))
+SITES.extend(build_interempresas(code,needs_firecrawl=True) for code in ["PS"] )#PA,CV,PS
+print(SITES)
 results = []
 
 
@@ -97,39 +95,61 @@ ARTICLE_SCHEMA = {
 },
 "required": ["articles"]
 }
+        
 
-for base_url in SITES:
-    print(f"\n--- Scraping {base_url} ---")
+def get_articles_from_rss(feed_url, needs_firecrawl=False):
+    if needs_firecrawl:
+        try:
+            result = app.scrape(feed_url, formats=["rawHtml"], proxy="enhanced",max_age=0)
+            xml = result.raw_html if hasattr(result, "raw_html") else result.rawHtml
+        except Exception as e:
+                print(f"⚠ Skipped site {feed_url}: {e}")
+    else:
+        headers = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"}
+        xml = requests.get(feed_url, headers=headers).text
 
+    feed = feedparser.parse(xml)
+    print(f"{len(feed.entries)} articles from {feed_url}")
+    return [{"title": e.title, "url": e.link} for e in feed.entries]
+
+
+
+def get_articles_from_site(base_url):
     try:
         homepage = app.scrape(
             base_url,
             formats=[{
                 "type": "json",
                 "schema": ARTICLE_SCHEMA,
-                "prompt": "Extract all the  news articles visible on the page,each with title url and a 2 line summary,all translated to English."
-                #"the summary is from the text you find but do not get it from the url itself only from the text you find about the article;the url"
-                #"is only to get the string of it ,not to go to that url just get its string of characters"
-                
-            }]
+                "prompt": "Extract all the articles on the page, each with title url and a 2 line summary, all translated to English."
+            }],
+            only_main_content=False,
+            max_age=0
         )
         data = homepage.json
+        print(f"{len(data.get('articles', []))} articles from {base_url}")
         if isinstance(data, dict):
-            articles_raw = data.get("articles", [])
+            return data.get("articles", [])
         elif isinstance(data, list):
-            articles_raw = data
+            return data
         else:
-            articles_raw = []
+            return []
     except Exception as e:
         print(f"⚠ Skipped site {base_url}: {e}")
-        continue
+        return []
 
-    
-    #---------------------------------------------------------------------------------------------
-    
 
+for site in SITES:    
+    # step 1---------get the articles--------------------------------------------------------------
+    if site.get("rss"):
+        print("camino RSS")
+        articles_raw = get_articles_from_rss(site["feed_url"], site["needs_firecrawl"])
+    else:
+        print("camino Normal")
+        articles_raw = get_articles_from_site(site["feed_url"])
     # Step 2: Scrape each article and generate a 3-line summary
     for article in articles_raw:
+        time_module.sleep(5)#rate limits apply 
         url = article.get("url", "")
         title = article.get("title", "")
 
@@ -147,12 +167,12 @@ for base_url in SITES:
             summary = page.json.get("summary", "") if page.json else ""
             print(page.markdown[:200])
         except Exception as e:
-            print(f"⚠ Skipped {url}: {e}")
+            print(f"⚠ unable to summarize {url}: {e}")
             continue
 
         
         results.append({
-    "site": base_url,
+    "site": site["name"],
     "title": title,
     "url": url,
     "summary": summary,
@@ -166,6 +186,45 @@ with open("newsletter.json", "w", encoding="utf-8") as f:
     json.dump(results, f, ensure_ascii=False, indent=2)
 
 print(f"\nDone. {len(results)} articles saved to newsletter.json")
+
+
+
+
+
+# Generate PDF
+
+from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, PageBreak, HRFlowable
+from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+from reportlab.lib.pagesizes import letter
+from reportlab.lib import colors
+from reportlab.lib.units import inch
+
+styles = getSampleStyleSheet()
+style_site = ParagraphStyle("site", fontSize=22, fontName="Helvetica-Bold", textColor=colors.HexColor("#2C3E50"), spaceAfter=16, spaceBefore=20)
+style_title = ParagraphStyle("title", fontSize=13, fontName="Helvetica-Bold", textColor=colors.HexColor("#1A1A1A"), spaceAfter=4, spaceBefore=14)
+style_url = ParagraphStyle("url", fontSize=8, fontName="Helvetica-Oblique", textColor=colors.HexColor("#7F8C8D"), spaceAfter=6)
+style_summary = ParagraphStyle("summary", fontSize=10, fontName="Helvetica", textColor=colors.HexColor("#333333"), spaceAfter=4, leading=16)
+
+doc = SimpleDocTemplate("newsletter.pdf", pagesize=letter, leftMargin=inch, rightMargin=inch, topMargin=inch, bottomMargin=inch)
+story = []
+
+current_site = None
+for article in results:
+    if article["site"] != current_site:
+        if current_site is not None:
+            story.append(PageBreak())
+        current_site = article["site"]
+        site_label = current_site.replace("https://www.", "").replace("/", "").split(".")[0].capitalize()
+        story.append(Paragraph(site_label, style_site))
+        story.append(HRFlowable(width="100%", thickness=2, color=colors.HexColor("#2C3E50"), spaceAfter=12))
+
+    story.append(Paragraph(article["title"], style_title))
+    story.append(Paragraph(article["url"], style_url))
+    story.append(Paragraph(article["summary"], style_summary))
+    story.append(HRFlowable(width="100%", thickness=0.5, color=colors.HexColor("#DDDDDD"), spaceAfter=6))
+
+doc.build(story)
+print("PDF saved to newsletter.pdf")
 
 
 
@@ -365,9 +424,9 @@ from reportlab.lib.units import inch
 import time
 from collections import Counter
 import re
-
-
 today = date.today().strftime("%B %d, %Y")
+
+
 
 bad = [a for a in articles if '"' in a.get("url", "")]
 print(len(bad), "articles with broken urls")
@@ -496,22 +555,12 @@ SITE_OVERRIDES = {
     "wsj.com": "WSJ",
 }
 
-def strip_scheme(u):
-    return u.split("://", 1)[-1]
+
 
 def get_site_name(url):
-    netloc = urlparse(url).netloc.lower()
-    if netloc.startswith("www."):
-        netloc = netloc[4:]
-    for key, name in SITE_OVERRIDES.items():
-        if key.startswith("http"):
-            if strip_scheme(url) == strip_scheme(key):
-                return name
-        elif netloc.endswith(key):
-            return name
-    return netloc.split('.')[-2].capitalize()
+    return next(d.get("name") for d in SITES if d.get("feed_url") == url)
 
-sites = list(dict.fromkeys(get_site_name(a["site"]) for a in articles if "site" in a))
+sites = list(dict.fromkeys(get_site_name(a.get("feed_url")) for a in SITES))
 title_text = " | ".join(sites)
 file_name = title_text.replace(" | ", "") + " " + today + ".pdf"
 
@@ -524,6 +573,9 @@ style_cover = ParagraphStyle("cover", fontSize=_size, leading=_size * 1.2,
 style_cover_big = ParagraphStyle("cover_big", fontSize=32, leading=38, fontName=HEAD,
                                  textColor=INK, spaceAfter=6)
 
+
+style_footer_link = ParagraphStyle("footer_link", fontSize=10, fontName=BODY_BOLD, textColor=ACCENT, alignment=TA_RIGHT)
+back_to_top_flowable = Paragraph('<a href="#top" color="#C1440E">▲ Top</a>', style_footer_link)
 # ── Category ordering ─────────────────────────────────────────────────────────
 PRODUCT_CATS = ["Access Control", "Closures", "Window", "Glazing", "Ventilation",
                 "Heating", "Air conditioning", "Lighting", "Sun Shading"]
@@ -542,31 +594,44 @@ def label(cat):
 
 _grouped_names = {c for _, members in GROUPS for c in members}
 
-top_cats = sorted([c for c in categories if c not in _grouped_names], key=str.lower)
+top_cats = sorted(
+    [c for c in categories if c not in _grouped_names and c.lower() != "others"],
+    key=str.lower
+)
+others_cat = next((c for c in categories if c.lower() == "others"), None)
+
+
 group_cats = [(heading, sorted([c for c in categories if c in members], key=str.lower))
               for heading, members in GROUPS]
 group_cats = [(heading, members) for heading, members in group_cats if members]
 
 ordered_cats = top_cats + [c for _, members in group_cats for c in members]
+if others_cat:
+    ordered_cats.append(others_cat)
 
 # ── Page furniture ────────────────────────────────────────────────────────────
 def page_footer(canvas, doc_):
     canvas.saveState()
     if canvas.getPageNumber() > 1:
         canvas.setFont(BODY, 8)
-        canvas.setFillColor(MUTED)
         page_no = str(canvas.getPageNumber())
         right_x = letter[0] - inch
-        room = (right_x - inch) - canvas.stringWidth(page_no, BODY, 8) - 18
 
+        
+        arrow_w = canvas.stringWidth("\u25B2 Top", BODY_BOLD, 10) + 4
+        back_to_top_flowable.wrap(arrow_w, 0.3 * inch)
+        back_to_top_flowable.drawOn(canvas, right_x - arrow_w, 0.58 * inch)
+
+        room = (right_x - arrow_w - 10 - inch) - canvas.stringWidth(page_no, BODY, 8) - 18
         footer_fs = 8.0
         while footer_fs > 5.0 and canvas.stringWidth(title_text, BODY, footer_fs) > room:
             footer_fs -= 0.25
 
         canvas.setFont(BODY, footer_fs)
+        canvas.setFillColor(MUTED)
         canvas.drawString(inch, 0.62 * inch, title_text)
         canvas.setFont(BODY, 8)
-        canvas.drawRightString(letter[0] - inch, 0.62 * inch, str(canvas.getPageNumber()))
+        canvas.drawRightString(right_x - arrow_w - 10, 0.62 * inch, page_no)
         canvas.setStrokeColor(HAIRLINE)
         canvas.setLineWidth(0.5)
         canvas.line(inch, 0.8 * inch, letter[0] - inch, 0.8 * inch)
@@ -638,6 +703,12 @@ def _build_toc(font_size, pad):
                          Paragraph(str(len(grouped[cat])), style_toc_count)])
             row_styles.append(("LINEBELOW", (0, len(rows) - 1), (-1, len(rows) - 1), 0.5, HAIRLINE))
 
+    if others_cat:
+        anchor = others_cat.replace(" ", "_").replace("&", "and")
+        rows.append([Paragraph(f'<a href="#{anchor}" color="#14213D">{esc(label(others_cat))}</a>', style_toc_link),
+                        Paragraph(str(len(grouped[others_cat])), style_toc_count)])
+        row_styles.append(("LINEBELOW", (0, len(rows) - 1), (-1, len(rows) - 1), 0.5, HAIRLINE))
+
     table = Table(rows, colWidths=[5.0 * inch, 1.5 * inch])
     table.setStyle(TableStyle([
         ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
@@ -674,7 +745,7 @@ for cat in ordered_cats:
     story.append(rule(ACCENT, 1.5, space_after=2))
 
     for i, article in enumerate(grouped[cat]):
-        site_label = get_site_name(article["site"]) if article.get("site") else ""
+        site_label = article["site"] 
         story.append(Paragraph(
             f'<a name="sum_{article["anchor_id"]}"/>'
             f'<a href="#full_{article["anchor_id"]}" color="#14213D">{esc(article["title"])}</a>',
@@ -686,7 +757,7 @@ for cat in ordered_cats:
         if i < count - 1:
             story.append(rule())
 
-    story.append(Paragraph('<a href="#top" color="#C1440E">↑ Back to contents</a>', style_back))
+    
     story.append(PageBreak())
 
 # ── Full articles ─────────────────────────────────────────────────────────────
@@ -700,13 +771,11 @@ for article in articles:
         if current_site is not None:
             story.append(PageBreak())
         current_site = article["site"]
-        story.append(Paragraph(esc(get_site_name(current_site)), style_site))
+        story.append(Paragraph(esc(current_site), style_site))
         story.append(rule(ACCENT, 1.5, space_after=6))
 
     story.append(Paragraph(
-        f'<a name="full_{article["anchor_id"]}"/>'
-        f'<a href="#sum_{article["anchor_id"]}" color="#14213D">{esc(article["title"])}</a>',
-        style_title))
+        f'<a name="full_{article["anchor_id"]}"/>{esc(article["title"])}',style_title))
     story.append(Paragraph(
         f'<a href="{safe_url(article["url"])}" color="#6B7280">{esc(article["url"][:90])}</a>', style_meta))
 
@@ -720,4 +789,6 @@ for article in articles:
 
 doc.build(story, onFirstPage=page_footer, onLaterPages=page_footer)
 print(f"PDF saved to {file_name}")
-print(str(" this is the NEW GUI."))
+print(str("this is the NEW GUI"))
+
+
