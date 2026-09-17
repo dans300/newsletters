@@ -2,13 +2,13 @@ import site
 import ssl
 from datetime import date, time, timedelta
 import feedparser
+import time as time_module
 from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, PageBreak
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib.pagesizes import letter
 from reportlab.lib import colors
 import requests
 import urllib3
-import time as time_module
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 ssl._create_default_https_context = ssl._create_unverified_context
 
@@ -55,11 +55,12 @@ def build_interempresas(code, days=60, needs_firecrawl=False):
     return {"rss": False,"name": name, "feed_url": None, "needs_firecrawl": needs_firecrawl}
 
 SITES  = [
-        {"rss": True,"name": "Security and sales", "feed_url": "http://feeds.feedburner.com/SecuritySalesIntegration", "needs_firecrawl": False}, 
-        {"rss": True,"name": "GEB", "feed_url": "https://www.geb-info.de/rss_feed/geb-rss-feed-meldungen", "needs_firecrawl": False}, 
-        {"rss": True,"name": "Glaswelt", "feed_url": "https://www.glaswelt.de/rss_feed/gw-rss-feed-meldungen", "needs_firecrawl": False}, 
-        {"rss": True,"name": "Haustec", "feed_url": "https://www.haustec.de/rss/heizung", "needs_firecrawl": False}, 
-        {"rss": True,"name": "WindowVision", "feed_url": "https://www.wf-vision.com/feed/", "needs_firecrawl": True} 
+        #{"rss": True,"name": "Security and sales", "feed_url": "http://feeds.feedburner.com/SecuritySalesIntegration", "needs_firecrawl": False}, 
+        #{"rss": True,"name": "GEB", "feed_url": "https://www.geb-info.de/rss_feed/geb-rss-feed-meldungen", "needs_firecrawl": False}, 
+        #{"rss": True,"name": "Glaswelt", "feed_url": "https://www.glaswelt.de/rss_feed/gw-rss-feed-meldungen", "needs_firecrawl": False}, 
+        #{"rss": True,"name": "Haustec", "feed_url": "https://www.haustec.de/rss/heizung", "needs_firecrawl": False}, 
+        #{"rss": True,"name": "WindowVision", "feed_url": "https://www.wf-vision.com/feed/", "needs_firecrawl": True}
+        {"rss": False,"name": "TechniqueBaie", "feed_url": "https://technicbaie.fr", "needs_firecrawl": True}  
 ]
 
 

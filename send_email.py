@@ -6,11 +6,14 @@ import requests
 print("--- STARTING EMAIL PROCESS (RESEND API) ---")
 
 # 1. Grab API key from GitHub Actions environment
+
 api_key = os.getenv("SEND_KEY")
+#api_key = "re_VPSMEGkd_ComJLdubRbhztuqjr5okyRpR"
 
 # WARNING: On Resend's free tier, the "to" email MUST be the exact 
 # email address you used to sign up for your Resend account.
 receiver_email = "groupsomfy@gmail.com"
+#
 
 if not api_key:
     print("API_KEY not found. Ensure GitHub Secrets are set.")
@@ -41,7 +44,7 @@ payload = {
     "from": "Acme <onboarding@resend.dev>", # Resend's default testing address
     "to": [receiver_email],
     "subject": "Your Generated Newsletter",
-    "html": "<p> this is the newsletter VERSION3 where FIRECRAWL does everything ,this is also the final version.There are only 6 of the sources included because of the high firecrawl credits consumption.Finally , this particular email and pdf-newsletter-compilation was generated on the cloud where i configured the project to be so it is independently run ,automatically, whenever we want during the month.Feedback is much appreciated! Best regards.  -Daniel SIERRA</p>",
+    "html": "<p>This is a test only.</p><p>Feedback is much appreciated! Best regards.  -Daniel SIERRA</p>",
     "attachments": [
         {
             "filename": attachment_name,

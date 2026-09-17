@@ -1,47 +1,39 @@
 
-rss_urls = [
-    "https://www.batiactu.com/accueil.rss",
-    "https://www.lemoniteur.fr/arc/outboundfeeds/rss/",
-    #fiec 
-   "https://us14.campaign-archive.com/feed?u=f8bcf676bb27fc2419df09e98&id=c744bdaafe",
-   "https://news.google.com/rss/search?q=BauInfoConsult",
-   "https://bauinfoconsult.de/feed/"
-   "https://www.geb-info.de/rss_feed/geb-rss-feed-meldungen",
-   "https://www.glaswelt.de/rss_feed/gw-rss-feed-meldungen",
-   # for haustec we have several RSS here https://www.haustec.de/rss
-   "https://news.google.com/rss/search?q=site:interempresas.net+cerramientos+ventanas&hl=es&gl=ES&ceid=ES:es",
-    "https://news.google.com/rss/search?q=site:interempresas.net+proteccion+solar+toldos+persianas&hl=es&gl=ES&ceid=ES:es",
-    "https://news.google.com/rss/search?q=site:interempresas.net+arquitectura+construccion&hl=es&gl=ES&ceid=ES:es",
-    "https://news.google.com/rss/search?q=site:interempresas.net+puertas+automatismos&hl=es&gl=ES&ceid=ES:es",
-    "https://news.google.com/rss/search?q=site:interempresas.net+%22smart+cities%22&hl=es&gl=ES&ceid=ES:es",
-    #ebc
-    "https://us11.campaign-archive.com/feed?u=3c690b345db3823f0db0cac0f&id=bfc8c22a7a",
-    #kunstof,
-    "https://www.kunststoffweb.de/rss/"
-    #avpro global , 
-    "https://www.avproglobal.com/blogs/news/tagged/avpro-global.atom"
-    #cepro
-    "https://www.cepro.com/feed/",
-    #kbis
-    "https://kbis.com/exhibitor-news/feed/",
-    "https://kbis.com/show-news/feed/",
-    "https://news.google.com/rss/search?q=site:kbis.com&hl=en&gl=US&ceid=US:en"
-    #systems and sales integration 
-    "http://feeds.feedburner.com/SecuritySalesIntegration",
-    "http://feeds.feedburner.com/SecuritySalesIntegration-News",
-    "http://feeds.feedburner.com/SecuritySalesIntegration-VideoSurveillance",
-    "http://feeds.feedburner.com/SecuritySalesIntegration-AccessControl",
-    "http://feeds.feedburner.com/SecuritySalesIntegration-FireIntrusion",
-    "http://feeds.feedburner.com/SecuritySalesIntegration-Automation",
-    "http://feeds.feedburner.com/SecuritySalesIntegration-SystemsIntegration",
-    "http://feeds.feedburner.com/SecuritySalesIntegration-Business",
-    "https://news.google.com/rss/search?q=site:securitysales.com&hl=en&gl=US&ceid=US:en",
-    #window fashion
-    "https://www.wf-vision.com/feed/"
-    #orgalim,
-    "https://orgalim.eu/en/feed/",
-    #technicbaie
-    #pending,
-    #codeconfiance,
-    "https://www.codeconfiance.com/feed/"]
+SITES = [
+{"rss": True,"name": "WindowVision", "feed_url": "https://www.wf-vision.com/feed/", "needs_firecrawl": True},
+{"rss": True,"name": "Batiactu", "feed_url": "https://www.batiactu.com/accueil.rss", "needs_firecrawl": False},
+{"rss": True,"name": "leMoniteur", "feed_url": "https://www.lemoniteur.fr/arc/outboundfeeds/rss/", "needs_firecrawl": False},
+{"rss": True,"name": "FIEC", "feed_url": "https://us14.campaign-archive.com/feed?u=f8bcf676bb27fc2419df09e98&id=c744bdaafe", "needs_firecrawl": False},
+{"rss": True,"name": "BauInfoConsult", "feed_url": "https://bauinfoconsult.de/feed/", "needs_firecrawl": False},
+{"rss": True,"name": "Geb", "feed_url": "https://www.geb-info.de/rss_feed/geb-rss-feed-meldungen", "needs_firecrawl": False},
+{"rss": True,"name": "GlasWelt", "feed_url": "https://www.glaswelt.de/rss_feed/gw-rss-feed-meldungen", "needs_firecrawl": False},
+{"rss": True,"name": "EBC", "feed_url":  "https://us11.campaign-archive.com/feed?u=3c690b345db3823f0db0cac0f&id=bfc8c22a7a", "needs_firecrawl": False}, 
+{"rss": True,"name": "Kunstof", "feed_url":  "https://www.kunststoffweb.de/rss/", "needs_firecrawl": False}, 
+{"rss": True,"name": "AVproGlobal", "feed_url": "https://www.avproglobal.com/blogs/news/tagged/avpro-global.atom", "needs_firecrawl": False},
+{"rss": True,"name": "CePro", "feed_url": "https://www.cepro.com/feed/", "needs_firecrawl": False},
+{"rss": True,"name": "Orgalim", "feed_url": "https://orgalim.eu/en/feed/", "needs_firecrawl": False},
+{"rss": True,"name": "CodeConfiance", "feed_url": "https://www.codeconfiance.com/feed/", "needs_firecrawl": False}]
+#systems and sales integration 
+"http://feeds.feedburner.com/SecuritySalesIntegration",
+"http://feeds.feedburner.com/SecuritySalesIntegration-News",
+"http://feeds.feedburner.com/SecuritySalesIntegration-VideoSurveillance",
+"http://feeds.feedburner.com/SecuritySalesIntegration-AccessControl",
+"http://feeds.feedburner.com/SecuritySalesIntegration-FireIntrusion",
+"http://feeds.feedburner.com/SecuritySalesIntegration-Automation",
+"http://feeds.feedburner.com/SecuritySalesIntegration-SystemsIntegration",
+"http://feeds.feedburner.com/SecuritySalesIntegration-Business",
+"https://news.google.com/rss/search?q=site:securitysales.com&hl=en&gl=US&ceid=US:en",
+excel ou word for pierre to discard
+#technicbaie
+https://technicbaie.fr/batimat
+https://technicbaie.fr/rencontre
+https://technicbaie.fr/marche
+https://technicbaie.fr/entreprise
+https://technicbaie.fr/technique
+https://technicbaie.fr/reglementation
+https://technicbaie.fr/realisations-4
+https://technicbaie.fr/profession
+https://technicbaie.fr/salons
+https://technicbaie.fr/videos
+# for haustec we have several RSS here https://www.haustec.de/rss
 

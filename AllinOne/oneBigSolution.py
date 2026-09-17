@@ -1,8 +1,4 @@
-"""
-get_somfy_category 
-get_somfy_category2 el de democracy
-get_somfy_category3 es firecrawl que lo hace 
-""" 
+
 
 import site
 import ssl
@@ -62,11 +58,11 @@ def build_interempresas(code, days=60, needs_firecrawl=False):
 
 SITES  = [
 
-        {"rss": True,"name": "Security and sales", "feed_url": "http://feeds.feedburner.com/SecuritySalesIntegration", "needs_firecrawl": False}, 
-        {"rss": True,"name": "GEB", "feed_url": "https://www.geb-info.de/rss_feed/geb-rss-feed-meldungen", "needs_firecrawl": False}, 
-        {"rss": True,"name": "Glaswelt", "feed_url": "https://www.glaswelt.de/rss_feed/gw-rss-feed-meldungen", "needs_firecrawl": False}, 
-        {"rss": True,"name": "Haustec", "feed_url": "https://www.haustec.de/rss/heizung", "needs_firecrawl": False}, 
-        {"rss": True,"name": "WindowVision", "feed_url": "https://www.wf-vision.com/feed/", "needs_firecrawl": True} 
+        #{"rss": True,"name": "Security and sales", "feed_url": "http://feeds.feedburner.com/SecuritySalesIntegration", "needs_firecrawl": False}, 
+        #{"rss": True,"name": "GEB", "feed_url": "https://www.geb-info.de/rss_feed/geb-rss-feed-meldungen", "needs_firecrawl": False}, 
+        #{"rss": True,"name": "Glaswelt", "feed_url": "https://www.glaswelt.de/rss_feed/gw-rss-feed-meldungen", "needs_firecrawl": False}, 
+        #{"rss": True,"name": "Haustec", "feed_url": "https://www.haustec.de/rss/heizung", "needs_firecrawl": False}, 
+        #{"rss": True,"name": "WindowVision", "feed_url": "https://www.wf-vision.com/feed/", "needs_firecrawl": True} 
 ]
 
 
@@ -111,7 +107,6 @@ def get_articles_from_rss(feed_url, needs_firecrawl=False):
     feed = feedparser.parse(xml)
     print(f"{len(feed.entries)} articles from {feed_url}")
     return [{"title": e.title, "url": e.link} for e in feed.entries]
-
 
 
 def get_articles_from_site(base_url):
@@ -160,7 +155,7 @@ for site in SITES:
                 url,
                 formats=["markdown",{
                     "type": "json",
-                    "prompt": "Summarize this article in exactly 3 lines. Return a JSON object with a 'summary' field."
+                    "prompt": "Summarize this article in exactly 3 lines in english. Return a JSON object with a 'summary' field."
                 }]
             )
 
@@ -257,7 +252,75 @@ today = date.today().strftime("%B %d, %Y")
 custom_http_client = httpx.Client(verify=False)
 
 
-#------------------------------------------------------------------------FIRECRAWL CLASSIFICATION -----------------------------------------------------------------------------
+##################################################################all types of CLASSIFICATIONs ##############################################################################
+
+"""
+get_somfy_category la original qui marche bien 
+get_somfy_category2 el de democracy (not in here)
+get_somfy_category3 es firecrawl que lo hace 
+
+""" 
+
+
+client = OpenAI(base_url="http://localhost:11434/v1", api_key="ollama")
+
+def get_somfy_category(title, summary):
+    name="gemma3:4b" 
+    system_instruction = ( "You are a master classifier for a construction news dashboard. "
+                       " Assign each article with one word following the following logic:"
+                         "if the article talks about anything a corporate decision where a product is not involved,assign the word (corporate) to the article, else"
+                         "if the article talks about anything related to Law check if its a law assign the word (regulation) to the article , else"
+                         "if the article talks about anything related to construction check if its residential -> housing: homes, apartments, social housing, student housing OR non-residential meaning everything else built: offices, retail, warehouses, "
+                         "hotels, hospitals, schools, roads, infrastructure and finally assign whichever of the two it is either (residential) or (non-residential) to the article , else"
+                         "if the artcile talks about anything related to a technology or product assign one word from [Access Control, Closures, Window, Glazing, Ventilation, Heating, Air conditioning, Lighting, Sun Shading] to the article, else"
+                         "if the artcile talks about anything related to special or extraordinary events assign the word (events) to the article.if the article wasnt assigned to any of the former categories then assign the word (others) to it."
+                         "Follow these rules: NEVER create new categories and every article must"
+                       "be classified to one and only one word in (corporate),(regulation), (residential), (non-residential),  (Access Control), (Closures), (Window), (Glazing), (Ventilation), (Heating), (Air conditioning), (Lighting), (Sun Shading),(events), (others)."
+    )                                               
+    response = None
+    prompt = f"Title: {title}\nSummary: {summary}\n\nCategory:"
+    #((((((((((((((((((((((((((()))))))))))))))))))))))))))
+    for provider in ["Together", "Fireworks", "DeepInfra"]:
+        try:
+            response = client.chat.completions.create(
+        model=name,
+         
+        messages=[
+            {"role": "system", "content": system_instruction},
+            {"role": "user", "content": prompt}
+        ],extra_body={
+        "provider": {
+            "order": [
+                provider
+            ],  # Example preference order
+            "allow_fallbacks": True,
+        }
+        },
+        temperature=0.0, # Zero temperature ensures consistency for the user
+        max_tokens=500,
+        #extra_body={"think": False},  # Disable internal reasoning to prevent hallucinations
+        #timeout=10.0
+    )
+            break
+        except Exception:
+            continue
+    #((((((((((((((((((((((((((()))))))))))))))))))))))))))
+    # 🛑 SAFETY GUARD: If all 3 providers failed, don't try to read .choices[0]
+    if not response :
+        return "others"
+    
+    raw = response.choices[0].message.content.strip()
+  
+    allowed = ["corporate", "regulation",
+            "residential", "non-residential",
+            "Access Control", "Closures", "Window", "Glazing", "Ventilation",
+            "Heating", "Air conditioning", "Lighting", "Sun Shading",
+            "events", "others"]
+    for word in allowed:
+        if word.lower() in raw.lower():
+            return word
+    return "others"  # Fallback category
+
 def get_somfy_category3(url):
     from typing import Literal
     from pydantic import BaseModel
@@ -308,8 +371,7 @@ def get_somfy_category3(url):
             return word
     return "others"  # Fallback category
 
-
-def clean_article(url):
+def Firecrawl_clean_article(url):
     from pydantic import BaseModel
 
     class Body(BaseModel):
@@ -347,8 +409,135 @@ def clean_article(url):
 
     return (data.get("text") or "").strip() or "unable to retrieve cleaned content"
 
-################################################################################TRANSLATION##################################################################################
+def clean_article(content):
+    response = client.chat.completions.create(
+        model="llama3.1:8b",
+        messages=[
+            {"role": "system", "content": (
+                "You are a text cleaner. Extract only the main article text from the content provided. "
+                "Remove all navigation links, job listings, webinar ads, newsletter signups, event listings, "
+                "service promotions, 'Les plus lus' sections, and any other site furniture."
+                "there shouldnt be any html tags in the output, only plain text.No links. No information within brackets should be included  "
+                "Return only the clean article body text, preserving paragraphs.your outputis only whats asked dont say anything else"
+                "like 'Here is the cleaned text' or 'The cleaned article is as follows'."
+            )},
+            {"role": "user", "content": content[:6000]}  # truncate to avoid context overflow
+        ],
+        temperature=0.0,
+        max_tokens=1000
+    )
+    return response.choices[0].message.content.strip()
 
+################################################################################TRANSLATION##################################################################################
+from py3langid import classify
+
+
+def is_english(text,t):
+    """Ask gemma whether the text is English. True / False."""
+    text = (text or "").strip()
+    t=1 if t>1 else t
+    if not text:
+        return True
+
+    try:
+        response = client.chat.completions.create(
+            model="gemma3:4b",
+            messages=[
+                {"role": "system", "content":
+                    "You decide what language a text is written in. "
+                    "Answer with exactly one word: YES if the text is English, "
+                    "NO if it is any other language. Brand names, product names "
+                    "and company names do not make a text non-English. "
+                    "Nothing else, no explanation."},
+                {"role": "user", "content": text[:800]},
+            ],
+            temperature=0.0+t,
+            max_tokens=5,
+        )
+        answer = (response.choices[0].message.content or "").strip().upper()
+    except Exception as exc:
+        print(f"    ! language check failed: {type(exc).__name__}: {exc}")
+        return True                       # on failure, assume English and move on
+
+    if answer.startswith("Y"):
+        return True
+
+    print("not english---->   ", text[:120])
+    return False
+
+
+
+def translate(content,t):
+    response = None
+    t=1 if t>1 else t
+    for provider in ["DeepInfra", "Together", "Fireworks"]:
+        try:
+            response = client.chat.completions.create(
+                model="gemma3:4b",#"llama-3.1-8b",
+                messages=[
+                    {"role": "system", "content": (
+                        "You are a translator, you must translate the following text to English.  "
+                        "Return only the translated text in english.your output is only whats asked dont say anything else"
+                        "like 'Here is the translated text' or 'The translated article is as follows'."
+                    )},
+                    {"role": "user", "content": content[:6000]}  # truncate to avoid context overflow
+                ],extra_body={
+                "provider": {
+                   "order":[ provider ],  # Example preference order
+                    "allow_fallbacks": True,
+                }
+            },
+                temperature=0.0+t,
+                max_tokens=1000
+            )
+            break
+        except Exception:
+            continue
+    try:
+        return response.choices[0].message.content.strip()
+    except Exception:
+        return "* " + content#translation failed, returning original content with asterisk to indicate failure
+
+
+def clip(text):
+    MAX_WORDS = 10
+    """Cut to MAX_WORDS and tidy any punctuation left dangling at the cut."""
+    words = text.split()
+    if len(words) > MAX_WORDS:
+        text = " ".join(words[:MAX_WORDS])
+    return text.rstrip(" ,;:-")
+
+
+def translate_title(title,t):
+    t=1 if t>1 else t
+    response = None
+    try:
+        response = client.chat.completions.create(
+            model="gemma3:4b",#"llama-3.1-8b",
+            messages=[
+                {"role": "system", "content": (
+                    "You are a summarizer, you must summarize the following headline into one sentence in english of 5 words or less. "
+                    "Return only the English sentence in 5 words or less. your output is only whats asked "
+                    "dont say anything else like 'Here is the translated text' or 'The translated "
+                    "article is as follows'. "
+                )},
+
+                {"role": "user", "content": title[:300]}],  # truncate to avoid context overflow,
+            temperature=0.0+t,
+            max_tokens=60,
+            stop=["\n"]
+            
+        )
+    except Exception:
+        return "* " + title
+
+    try:
+        out = response.choices[0].message.content.strip()
+    except Exception:
+        return "* " + title
+
+    out = out.strip('"\'').split("\n")[0].strip()
+    return clip(out) if out else "* " + title
 
 
 
@@ -362,30 +551,42 @@ default_category="others"
 
 for i, article in enumerate(articles):
     article["anchor_id"] = f"art_{i}"    
-    
-    # Try to get the category, catch the crash if the API fails
-    try:
-        category = get_somfy_category3(article["url"])
-    except Exception as e:
-        print(f"API error on article {i}, defaulting to 'Others': {e}")
-        category = default_category
 
-    # If the API succeeds but returns None or an empty string, fallback to Others
-    if not category:
-        category = default_category
+    t=0
+    title=translate_title(article.get("title", ""),t)
+    summary=translate(article.get("summary", ""),t)
+    iters=0
+    max_iters=10
+    while(is_english(title,t)==False):
+        print("-----------------------------------------------------------------------------title not in english, translating again")
+        title=translate_title(article.get("title", ""), t)
+        t+=0.1
+        if iters>max_iters:
+            break
+        iters+=1
+    t=0
+    iters=0
+    while(is_english(summary,t)==False):
+        print("---------------------------summary not in english, translating again")
+        summary=translate(article.get("summary", ""), t)
+        t+=0.1
+        if iters>max_iters:
+            break
+        iters+=1
 
+    article["title"] = title
+    article["summary"] = summary
+
+    category = get_somfy_category(title, summary)
     article["category"] = category
     
-    # Safely grab the title so the print statement doesn't crash if title is missing
-    article["title"] = article.get("title", "Untitled")
-    title = article.get("title", "Untitled")
     print(f"[{category}] {title[:50]}...")
     
     raw_content = article.get("content", "")
     if raw_content:
-        article["clean_content"] = clean_article(article["url"])
+        article["clean_content"] = clean_article(article["content"])
     else:
-        article["clean_content"] = ""
+        article["clean_content"] = " unable to retrieve cleaned article content"
 
 
 

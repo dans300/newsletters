@@ -5,3 +5,4 @@ requests
 openai
 httpx
 feedparser
+py3langid

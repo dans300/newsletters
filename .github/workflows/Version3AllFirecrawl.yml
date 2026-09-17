@@ -1,4 +1,4 @@
-name: Version3-Firecrawl 
+name: Version-Firecrawl+ollamaLocal
 
 on:
   schedule:
@@ -25,10 +25,43 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
+      # ── Ollama ────────────────────────────────────────────────────────────
+      - name: Cache Ollama models
+        id: ollama-cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.ollama/models
+          key: ollama-llama31-8b-gemma3-4b-v1
+
+      - name: Install Ollama
+        run: curl -fsSL https://ollama.com/install.sh | sh
+
+      - name: Start Ollama
+        run: |
+          ollama serve &
+          # wait for the server to answer before pulling anything
+          for i in $(seq 1 30); do
+            if curl -sf http://localhost:11434/api/tags > /dev/null; then
+              echo "ollama is up"
+              break
+            fi
+            sleep 2
+          done
+
+      - name: Pull models
+        run: |
+          # no-ops when the cache restored them
+          ollama pull llama3.1:8b
+          ollama pull gemma3:4b
+          ollama list
+          df -h /
+
+      # ── Pipeline ──────────────────────────────────────────────────────────
       - name: Run scripts and isolate outputs
         env:
           FIRECRAWL_API_KEY: ${{ secrets.FIRE_CRAWL }}
           SEND_KEY: ${{ secrets.SEND_KEY }}
+          OLLAMA_HOST: http://localhost:11434
         run: |
           mkdir -p hidden_old_pdfs
           mv *.pdf hidden_old_pdfs/ 2>/dev/null || true
