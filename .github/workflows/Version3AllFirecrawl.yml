@@ -38,20 +38,42 @@ jobs:
         run: curl -fsSL https://ollama.com/install.sh | sh
 
       - name: Start Ollama
+        env:
+          OLLAMA_HOST: 127.0.0.1:11434
         run: |
-          ollama serve &
-          # wait for the server to answer before pulling anything
-          for i in $(seq 1 30); do
-            if curl -sf http://localhost:11434/api/tags > /dev/null; then
-              echo "ollama is up"
-              break
+          set -euo pipefail
+
+          # Avoid competing with an Ollama service already present on the runner.
+          pkill -x ollama || true
+          sleep 2
+
+          nohup ollama serve >"$RUNNER_TEMP/ollama.log" 2>&1 &
+          echo $! > "$RUNNER_TEMP/ollama.pid"
+
+          for i in $(seq 1 60); do
+            if curl --fail --silent http://127.0.0.1:11434/api/tags >/dev/null; then
+              echo "Ollama is ready"
+              exit 0
             fi
+
+            if ! kill -0 "$(cat "$RUNNER_TEMP/ollama.pid")" 2>/dev/null; then
+              echo "Ollama exited unexpectedly:"
+              cat "$RUNNER_TEMP/ollama.log"
+              exit 1
+            fi
+
             sleep 2
           done
 
+          echo "Ollama did not become ready:"
+          cat "$RUNNER_TEMP/ollama.log"
+          exit 1
+
       - name: Pull models
+        env:
+          OLLAMA_HOST: http://127.0.0.1:11434
         run: |
-          # no-ops when the cache restored them
+          set -euo pipefail
           ollama pull llama3.1:8b
           ollama pull gemma3:4b
           ollama list
