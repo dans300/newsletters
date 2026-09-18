@@ -425,7 +425,7 @@ def clean_article(content):
             {"role": "user", "content": content[:6000]}  # truncate to avoid context overflow
         ],
         temperature=0.0,
-        max_tokens=1000
+        max_tokens=1000,
         timeout=300.0
     )
     return response.choices[0].message.content.strip()
@@ -493,7 +493,7 @@ def translate(content,t):
                 temperature=0.0+t,
                 max_tokens=1000,
                 timeout=180.0
-            )
+        )
             break
         except Exception:
             continue
