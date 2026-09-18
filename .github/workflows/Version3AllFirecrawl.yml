@@ -31,7 +31,7 @@ jobs:
         id: ollama-cache
         uses: actions/cache@v4
         with:
-          path: ~/.ollama/models
+          path: /home/runner/ollama-models
           key: ollama-llama31-8b-gemma3-4b-v1
 
       - name: Install Ollama
@@ -41,6 +41,7 @@ jobs:
         env:
           OLLAMA_HOST: 127.0.0.1:11434
           OLLAMA_MAX_LOADED_MODELS: 1
+          OLLAMA_MODELS: /home/runner/ollama-models
         run: |
           set -euo pipefail
 
@@ -73,6 +74,7 @@ jobs:
       - name: Pull models
         env:
           OLLAMA_HOST: http://127.0.0.1:11434
+          OLLAMA_MODELS: /home/runner/ollama-models
         run: |
           set -euo pipefail
           ollama pull llama3.1:8b

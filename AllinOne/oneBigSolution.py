@@ -601,7 +601,12 @@ for i, article in enumerate(articles):
     else:
         article["clean_content"] = " unable to retrieve cleaned article content"
 
-
+print("**************************            TRANSLATING ARTICLES           ********************************")
+for i, article in enumerate(articles):
+    print(f"   Translating article {i+1}/{len(articles)}: {article.get('title', '')[:60]}...")
+    raw_content = article.get("clean_content", "")
+    article["clean_content"] = translate(raw_content, 0)
+    
 
 
 
