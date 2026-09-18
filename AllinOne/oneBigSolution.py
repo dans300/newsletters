@@ -555,24 +555,28 @@ for i, article in enumerate(articles):
     t=0
     title=translate_title(article.get("title", ""),t)
     summary=translate(article.get("summary", ""),t)
-    iters=0
-    max_iters=10
-    while(is_english(title,t)==False):
-        print("-----------------------------------------------------------------------------title not in english, translating again")
-        title=translate_title(article.get("title", ""), t)
-        t+=0.1
-        if iters>max_iters:
+    max_iters=5
+    title = translate_title(article.get("title", ""), t)
+
+    for _ in range(max_iters):
+        if is_english(title, t):
             break
-        iters+=1
+        print("---------------------------------------------------------------------title not in english, translating again")
+        t += 0.2
+        title = translate_title(article.get("title", ""), t)
+    else:
+        print("################################################## Giving up on title, using:", title[:60])
+
     t=0
-    iters=0
-    while(is_english(summary,t)==False):
-        print("---------------------------summary not in english, translating again")
-        summary=translate(article.get("summary", ""), t)
-        t+=0.1
-        if iters>max_iters:
+   
+    for _ in range(max_iters):
+        if is_english(summary, t):
             break
-        iters+=1
+        print("---------------------------summary not in english, translating again")
+        t+=0.2
+        summary=translate(article.get("summary", ""), t)
+    else:
+        print("################################################## Giving up on summary, using:", summary[:60])
 
     article["title"] = title
     article["summary"] = summary
