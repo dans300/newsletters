@@ -411,24 +411,28 @@ def Firecrawl_clean_article(url):
     return (data.get("text") or "").strip() or "unable to retrieve cleaned content"
 
 def clean_article(content):
-    response = client.chat.completions.create(
-        model="llama3.1:8b",
-        messages=[
-            {"role": "system", "content": (
-                "You are a text cleaner. Extract only the main article text from the content provided. "
-                "Remove all navigation links, job listings, webinar ads, newsletter signups, event listings, "
-                "service promotions, 'Les plus lus' sections, and any other site furniture."
-                "there shouldnt be any html tags in the output, only plain text.No links. No information within brackets should be included  "
-                "Return only the clean article body text, preserving paragraphs.your outputis only whats asked dont say anything else"
-                "like 'Here is the cleaned text' or 'The cleaned article is as follows'."
-            )},
-            {"role": "user", "content": content[:6000]}  # truncate to avoid context overflow
-        ],
-        temperature=0.0,
-        max_tokens=1000,
-        timeout=300.0
-    )
-    return response.choices[0].message.content.strip()
+    try:
+        response = client.chat.completions.create(
+            model="llama3.1:8b",
+            messages=[
+                {"role": "system", "content": (
+                    "You are a text cleaner. Extract only the main article text from the content provided. "
+                    "Remove all navigation links, job listings, webinar ads, newsletter signups, event listings, "
+                    "service promotions, 'Les plus lus' sections, and any other site furniture."
+                    "there shouldnt be any html tags in the output, only plain text.No links. No information within brackets should be included  "
+                    "Return only the clean article body text, preserving paragraphs.your outputis only whats asked dont say anything else"
+                    "like 'Here is the cleaned text' or 'The cleaned article is as follows'."
+                )},
+                {"role": "user", "content": content[:5000]}  # truncate to avoid context overflow
+            ],
+            temperature=0.0,
+            max_tokens=1000,
+            timeout=200.0
+        )
+        return response.choices[0].message.content.strip()
+    except Exception as exc:
+        print(f"  ! clean failed: {type(exc).__name__}", flush=True)
+        return content
 
 ################################################################################TRANSLATION##################################################################################
 from py3langid import classify
@@ -597,7 +601,7 @@ for i, article in enumerate(articles):
     print(f"Cleaning article {i+1}/{len(articles)}: {article.get('title', '')[:60]}...")
     raw_content = article.get("content", "")
     if raw_content:
-        article["clean_content"] = clean_article(article["content"])
+        article["clean_content"] = clean_article(raw_content)
     else:
         article["clean_content"] = " unable to retrieve cleaned article content"
 

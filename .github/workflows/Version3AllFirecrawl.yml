@@ -88,6 +88,7 @@ jobs:
         env:
           FIRECRAWL_API_KEY: ${{ secrets.FIRE_CRAWL }}
           OLLAMA_HOST: http://localhost:11434
+          PYTHONUNBUFFERED: "1"
         run: |
           mkdir -p hidden_old_pdfs
           mv *.pdf hidden_old_pdfs/ 2>/dev/null || true
