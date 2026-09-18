@@ -585,7 +585,11 @@ for i, article in enumerate(articles):
     article["category"] = category
     
     print(f"[{category}] {title[:50]}...")
-    
+
+
+print("**************************            CLEANING ARTICLES           ********************************")
+for i, article in enumerate(articles):
+    print(f"Cleaning article {i+1}/{len(articles)}: {article.get('title', '')[:60]}...")
     raw_content = article.get("content", "")
     if raw_content:
         article["clean_content"] = clean_article(article["content"])

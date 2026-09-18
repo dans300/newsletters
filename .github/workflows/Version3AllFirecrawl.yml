@@ -40,6 +40,7 @@ jobs:
       - name: Start Ollama
         env:
           OLLAMA_HOST: 127.0.0.1:11434
+          OLLAMA_MAX_LOADED_MODELS: 1
         run: |
           set -euo pipefail
 
@@ -78,6 +79,7 @@ jobs:
           ollama pull gemma3:4b
           ollama list
           df -h /
+          free -h
 
       # ── Pipeline ──────────────────────────────────────────────────────────
       - name: Run scripts and isolate outputs
