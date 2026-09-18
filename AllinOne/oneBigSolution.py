@@ -300,6 +300,7 @@ def get_somfy_category(title, summary):
         max_tokens=500,
         #extra_body={"think": False},  # Disable internal reasoning to prevent hallucinations
         #timeout=10.0
+        timeout=180.0
     )
             break
         except Exception:
@@ -425,6 +426,7 @@ def clean_article(content):
         ],
         temperature=0.0,
         max_tokens=1000
+        timeout=300.0
     )
     return response.choices[0].message.content.strip()
 
@@ -453,6 +455,7 @@ def is_english(text,t):
             ],
             temperature=0.0+t,
             max_tokens=5,
+            timeout=180.0
         )
         answer = (response.choices[0].message.content or "").strip().upper()
     except Exception as exc:
@@ -488,7 +491,8 @@ def translate(content,t):
                 }
             },
                 temperature=0.0+t,
-                max_tokens=1000
+                max_tokens=1000,
+                timeout=180.0
             )
             break
         except Exception:
@@ -525,6 +529,7 @@ def translate_title(title,t):
                 {"role": "user", "content": title[:300]}],  # truncate to avoid context overflow,
             temperature=0.0+t,
             max_tokens=60,
+            timeout=180.0,
             stop=["\n"]
             
         )
