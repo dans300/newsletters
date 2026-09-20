@@ -144,7 +144,7 @@ for site in SITES:
         articles_raw = get_articles_from_site(site["feed_url"])
     # Step 2: Scrape each article and generate a 3-line summary
     for article in articles_raw:
-        time_module.sleep(5)#rate limits apply 
+        time_module.sleep(1)#rate limits apply 
         url = article.get("url", "")
         title = article.get("title", "")
 
@@ -413,7 +413,7 @@ def Firecrawl_clean_article(url):
 def clean_article(content):
     try:
         response = client.chat.completions.create(
-            model="llama3.1:8b",
+            model="gemma3:4b",#"llama3.1:8b",
             messages=[
                 {"role": "system", "content": (
                     "You are a text cleaner. Extract only the main article text from the content provided. "
@@ -564,14 +564,14 @@ for i, article in enumerate(articles):
     t=0
     title=translate_title(article.get("title", ""),t)
     summary=translate(article.get("summary", ""),t)
-    max_iters=5
+    max_iters=3
     title = translate_title(article.get("title", ""), t)
 
     for _ in range(max_iters):
         if is_english(title, t):
             break
         print("---------------------------------------------------------------------title not in english, translating again")
-        t += 0.2
+        t += 0.3
         title = translate_title(article.get("title", ""), t)
     else:
         print("################################################## Giving up on title, using:", title[:60])
@@ -582,7 +582,7 @@ for i, article in enumerate(articles):
         if is_english(summary, t):
             break
         print("---------------------------summary not in english, translating again")
-        t+=0.2
+        t+=0.3
         summary=translate(article.get("summary", ""), t)
     else:
         print("################################################## Giving up on summary, using:", summary[:60])
