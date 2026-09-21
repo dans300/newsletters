@@ -27,9 +27,8 @@ jobs:
           pip install -r requirements.txt
 
       # ── Ollama ────────────────────────────────────────────────────────────
-      - name: Cache Ollama models
-        id: ollama-cache
-        uses: actions/cache@v4
+      - name: Restore Ollama models
+        uses: actions/cache/restore@v4
         with:
           path: /home/runner/ollama-models
           key: ollama-llama31-8b-gemma3-4b-v1
@@ -118,3 +117,9 @@ jobs:
           gh release create "$TAG" "$FILE" \
             --title "Newsletter $(date +%d\ %B\ %Y)" \
             --notes "Automated newsletter."
+      - name: Save Ollama models
+        if: always()
+        uses: actions/cache/save@v4
+        with:
+          path: /home/runner/ollama-models
+          key: ollama-llama31-8b-gemma3-4b-v1

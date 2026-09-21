@@ -56,17 +56,20 @@ def build_interempresas(code, days=60, needs_firecrawl=False):
             return {"rss": False,"name": name, "feed_url": url, "needs_firecrawl": needs_firecrawl}
     return {"rss": False,"name": name, "feed_url": None, "needs_firecrawl": needs_firecrawl}
 
-SITES  = [
-
-        #{"rss": True,"name": "Security and sales", "feed_url": "http://feeds.feedburner.com/SecuritySalesIntegration", "needs_firecrawl": False}, 
-        #{"rss": True,"name": "GEB", "feed_url": "https://www.geb-info.de/rss_feed/geb-rss-feed-meldungen", "needs_firecrawl": False}, 
-        #{"rss": True,"name": "Glaswelt", "feed_url": "https://www.glaswelt.de/rss_feed/gw-rss-feed-meldungen", "needs_firecrawl": False}, 
-        #{"rss": True,"name": "Haustec", "feed_url": "https://www.haustec.de/rss/heizung", "needs_firecrawl": False}, 
-        #{"rss": True,"name": "WindowVision", "feed_url": "https://www.wf-vision.com/feed/", "needs_firecrawl": True} 
+SITES = [
+#{"rss": True,"name": "WindowVision", "feed_url": "https://www.wf-vision.com/feed/", "needs_firecrawl": True},
+#{"rss": True,"name": "leMoniteur", "feed_url": "https://www.lemoniteur.fr/arc/outboundfeeds/rss/", "needs_firecrawl": False},
+#{"rss": True,"name": "BauInfoConsult", "feed_url": "https://bauinfoconsult.de/feed/", "needs_firecrawl": False},
+#{"rss": True,"name": "Geb", "feed_url": "https://www.geb-info.de/rss_feed/geb-rss-feed-meldungen", "needs_firecrawl": False},
+#{"rss": True,"name": "GlasWelt", "feed_url": "https://www.glaswelt.de/rss_feed/gw-rss-feed-meldungen", "needs_firecrawl": False},
+#{"rss": True,"name": "Kunstof", "feed_url":  "https://www.kunststoffweb.de/rss/", "needs_firecrawl": False}, 
+#{"rss": True,"name": "CePro", "feed_url": "https://www.cepro.com/feed/", "needs_firecrawl": False},
+#{"rss": True,"name": "Orgalim", "feed_url": "https://orgalim.eu/en/feed/", "needs_firecrawl": False},
+#{"rss": True,"name": "CodeConfiance", "feed_url": "https://www.codeconfiance.com/feed/", "needs_firecrawl": False}
 ]
 
 
-SITES.extend(build_interempresas(code,needs_firecrawl=True) for code in ["PS"] )#PA,CV,PS
+SITES.extend(build_interempresas(code,needs_firecrawl=True) for code in ["CV"] )#PA,CV,PS
 print(SITES)
 results = []
 
@@ -144,7 +147,7 @@ for site in SITES:
         articles_raw = get_articles_from_site(site["feed_url"])
     # Step 2: Scrape each article and generate a 3-line summary
     for article in articles_raw:
-        time_module.sleep(1)#rate limits apply 
+        #time_module.sleep(1)#rate limits apply 
         url = article.get("url", "")
         title = article.get("title", "")
 
@@ -521,7 +524,7 @@ def translate_title(title,t):
     response = None
     try:
         response = client.chat.completions.create(
-            model="gemma3:4b",#"llama-3.1-8b",
+            model="gemma3:4b",#"llama-3.1-8b" IS THE ORIGINAL MODEL,
             messages=[
                 {"role": "system", "content": (
                     "You are a summarizer, you must summarize the following headline into one sentence in english of 5 words or less. "
@@ -595,23 +598,13 @@ for i, article in enumerate(articles):
     
     print(f"[{category}] {title[:50]}...")
 
-
-print("**************************            CLEANING ARTICLES           ********************************")
-for i, article in enumerate(articles):
-    print(f"Cleaning article {i+1}/{len(articles)}: {article.get('title', '')[:60]}...")
-    raw_content = article.get("content", "")
+    raw_content = article.get("url", "")
     if raw_content:
-        article["clean_content"] = Firecrawl_clean_article(article.get("url", ""))
+        article["clean_content"] = translate(Firecrawl_clean_article(raw_content), 0)
     else:
         article["clean_content"] = " unable to retrieve cleaned article content"
 
-print("**************************            TRANSLATING ARTICLES           ********************************")
-for i, article in enumerate(articles):
-    print(f"   Translating article {i+1}/{len(articles)}: {article.get('title', '')[:60]}...")
-    raw_content = article.get("clean_content", "")
-    article["clean_content"] = translate(raw_content, 0)
-    
-
+"""SOLUCION : Poner a clean con llama toma demasiado tiempo en github y no es practico , la solucion fue con firecrawl_clean_article y y traducir con Gemma """
 
 
 with open("articles_classified.json", "w", encoding="utf-8") as file:
