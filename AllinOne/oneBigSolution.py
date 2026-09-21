@@ -601,7 +601,7 @@ for i, article in enumerate(articles):
     print(f"Cleaning article {i+1}/{len(articles)}: {article.get('title', '')[:60]}...")
     raw_content = article.get("content", "")
     if raw_content:
-        article["clean_content"] = clean_article(raw_content)
+        article["clean_content"] = Firecrawl_clean_article(article.get("url", ""))
     else:
         article["clean_content"] = " unable to retrieve cleaned article content"
 
