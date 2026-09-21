@@ -57,11 +57,11 @@ def build_interempresas(code, days=60, needs_firecrawl=False):
     return {"rss": False,"name": name, "feed_url": None, "needs_firecrawl": needs_firecrawl}
 
 SITES = [
-#{"rss": True,"name": "WindowVision", "feed_url": "https://www.wf-vision.com/feed/", "needs_firecrawl": True},
-#{"rss": True,"name": "leMoniteur", "feed_url": "https://www.lemoniteur.fr/arc/outboundfeeds/rss/", "needs_firecrawl": False},
-#{"rss": True,"name": "BauInfoConsult", "feed_url": "https://bauinfoconsult.de/feed/", "needs_firecrawl": False},
-#{"rss": True,"name": "Geb", "feed_url": "https://www.geb-info.de/rss_feed/geb-rss-feed-meldungen", "needs_firecrawl": False},
-#{"rss": True,"name": "GlasWelt", "feed_url": "https://www.glaswelt.de/rss_feed/gw-rss-feed-meldungen", "needs_firecrawl": False},
+{"rss": True,"name": "WindowVision", "feed_url": "https://www.wf-vision.com/feed/", "needs_firecrawl": True},
+{"rss": True,"name": "leMoniteur", "feed_url": "https://www.lemoniteur.fr/arc/outboundfeeds/rss/", "needs_firecrawl": False},
+{"rss": True,"name": "BauInfoConsult", "feed_url": "https://bauinfoconsult.de/feed/", "needs_firecrawl": False},
+{"rss": True,"name": "Geb", "feed_url": "https://www.geb-info.de/rss_feed/geb-rss-feed-meldungen", "needs_firecrawl": False},
+{"rss": True,"name": "GlasWelt", "feed_url": "https://www.glaswelt.de/rss_feed/gw-rss-feed-meldungen", "needs_firecrawl": False},
 #{"rss": True,"name": "Kunstof", "feed_url":  "https://www.kunststoffweb.de/rss/", "needs_firecrawl": False}, 
 #{"rss": True,"name": "CePro", "feed_url": "https://www.cepro.com/feed/", "needs_firecrawl": False},
 #{"rss": True,"name": "Orgalim", "feed_url": "https://orgalim.eu/en/feed/", "needs_firecrawl": False},
@@ -69,7 +69,7 @@ SITES = [
 ]
 
 
-SITES.extend(build_interempresas(code,needs_firecrawl=True) for code in ["CV"] )#PA,CV,PS
+SITES.extend(build_interempresas(code,needs_firecrawl=True) for code in ["PA"] )#PA,CV,PS
 print(SITES)
 results = []
 
