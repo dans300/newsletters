@@ -27,13 +27,9 @@ import json
 from firecrawl import Firecrawl
 
 
-app = Firecrawl(api_key=os.getenv("FIRE_CRAWL"))
-#groupsomfy fc-3840d2d759ba4fc780bdbe2cf53ddfa5
-#brandon api fc-5be3e611cd87485e9e703556a4522f78
-#GITHUB fc-0647e8554d984502b02fcb4e59109672
-#somfy fc-c925bfee660343c4af8349e197605baf
-#UDEA fc-3218cf41b6364aa29841b43267cfaf71
-
+app = Firecrawl(api_key=os.getenv("FIRE_CRAWL")
+#
+#
 
 CATEGORY_MAP = {
     "ps": "Protección Solar",
@@ -58,10 +54,10 @@ def build_interempresas(code, days=60, needs_firecrawl=False):
 
 SITES = [
 {"rss": True,"name": "WindowVision", "feed_url": "https://www.wf-vision.com/feed/", "needs_firecrawl": True},
-{"rss": True,"name": "leMoniteur", "feed_url": "https://www.lemoniteur.fr/arc/outboundfeeds/rss/", "needs_firecrawl": False},
-{"rss": True,"name": "BauInfoConsult", "feed_url": "https://bauinfoconsult.de/feed/", "needs_firecrawl": False},
-{"rss": True,"name": "Geb", "feed_url": "https://www.geb-info.de/rss_feed/geb-rss-feed-meldungen", "needs_firecrawl": False},
-{"rss": True,"name": "GlasWelt", "feed_url": "https://www.glaswelt.de/rss_feed/gw-rss-feed-meldungen", "needs_firecrawl": False}
+{"rss": True,"name": "leMoniteur", "feed_url": "https://www.lemoniteur.fr/arc/outboundfeeds/rss/", "needs_firecrawl": False}
+#{"rss": True,"name": "BauInfoConsult", "feed_url": "https://bauinfoconsult.de/feed/", "needs_firecrawl": False},
+#{"rss": True,"name": "Geb", "feed_url": "https://www.geb-info.de/rss_feed/geb-rss-feed-meldungen", "needs_firecrawl": False},
+#{"rss": True,"name": "GlasWelt", "feed_url": "https://www.glaswelt.de/rss_feed/gw-rss-feed-meldungen", "needs_firecrawl": False},
 #{"rss": True,"name": "Kunstof", "feed_url":  "https://www.kunststoffweb.de/rss/", "needs_firecrawl": False}, 
 #{"rss": True,"name": "CePro", "feed_url": "https://www.cepro.com/feed/", "needs_firecrawl": False},
 #{"rss": True,"name": "Orgalim", "feed_url": "https://orgalim.eu/en/feed/", "needs_firecrawl": False},
