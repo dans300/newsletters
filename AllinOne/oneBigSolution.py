@@ -27,7 +27,7 @@ import json
 from firecrawl import Firecrawl
 
 
-app = Firecrawl(api_key=os.getenv("FIRE_CRAWL")
+app = Firecrawl(api_key=os.getenv("FIRE_CRAWL"))
 #
 #
 
