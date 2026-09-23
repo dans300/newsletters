@@ -53,8 +53,8 @@ def build_interempresas(code, days=60, needs_firecrawl=False):
     return {"rss": False,"name": name, "feed_url": None, "needs_firecrawl": needs_firecrawl}
 
 SITES = [
-{"rss": True,"name": "WindowVision", "feed_url": "https://www.wf-vision.com/feed/", "needs_firecrawl": True},
-{"rss": True,"name": "leMoniteur", "feed_url": "https://www.lemoniteur.fr/arc/outboundfeeds/rss/", "needs_firecrawl": False}
+#{"rss": True,"name": "WindowVision", "feed_url": "https://www.wf-vision.com/feed/", "needs_firecrawl": True},
+#{"rss": True,"name": "leMoniteur", "feed_url": "https://www.lemoniteur.fr/arc/outboundfeeds/rss/", "needs_firecrawl": False}
 #{"rss": True,"name": "BauInfoConsult", "feed_url": "https://bauinfoconsult.de/feed/", "needs_firecrawl": False},
 #{"rss": True,"name": "Geb", "feed_url": "https://www.geb-info.de/rss_feed/geb-rss-feed-meldungen", "needs_firecrawl": False},
 #{"rss": True,"name": "GlasWelt", "feed_url": "https://www.glaswelt.de/rss_feed/gw-rss-feed-meldungen", "needs_firecrawl": False},
@@ -261,9 +261,69 @@ get_somfy_category3 es firecrawl que lo hace
 """ 
 
 
-client = OpenAI(base_url="http://localhost:11434/v1", api_key="ollama")
+#client = OpenAI(base_url="http://localhost:11434/v1", api_key="ollama")
+client = OpenAI(base_url="https://openrouter.ai/api/v1", api_key= os.getenv("OPENROUTER_API_KEY"),
+                http_client=custom_http_client)
 
+name="google/gemma-3-4b-it"
 def get_somfy_category(title, summary):
+    system_instruction = ( "You are a master classifier for a construction news dashboard. "
+                       " Assign each article with one word following the following logic:"
+                         "if the article talks about anything a corporate decision where a product is not involved,assign the word (corporate) to the article, else"
+                         "if the article talks about anything related to Law check if its a law assign the word (regulation) to the article , else"
+                         "if the article talks about anything related to construction check if its residential -> housing: homes, apartments, social housing, student housing OR non-residential meaning everything else built: offices, retail, warehouses, "
+                         "hotels, hospitals, schools, roads, infrastructure and finally assign whichever of the two it is either (residential) or (non-residential) to the article , else"
+                         "if the artcile talks about anything related to a technology or product assign one word from [Access Control, Closures, Window, Glazing, Ventilation, Heating, Air conditioning, Lighting, Sun Shading] to the article, else"
+                         "if the artcile talks about anything related to special or extraordinary events assign the word (events) to the article.if the article wasnt assigned to any of the former categories then assign the word (others) to it."
+                         "Follow these rules: NEVER create new categories and every article must"
+                       "be classified to one and only one word in (corporate),(regulation), (residential), (non-residential),  (Access Control), (Closures), (Window), (Glazing), (Ventilation), (Heating), (Air conditioning), (Lighting), (Sun Shading),(events), (others)."
+    )                                               
+    response = None
+    prompt = f"Title: {title}\nSummary: {summary}\n\nCategory:"
+    #((((((((((((((((((((((((((()))))))))))))))))))))))))))
+    for provider in ["Together", "Fireworks", "DeepInfra"]:
+        try:
+            response = client.chat.completions.create(
+        model=name,
+         
+        messages=[
+            {"role": "system", "content": system_instruction},
+            {"role": "user", "content": prompt}
+        ],extra_body={
+        "provider": {
+            "order": [
+                provider
+            ],  # Example preference order
+            "allow_fallbacks": True,
+        }
+        },
+        temperature=0.0, # Zero temperature ensures consistency for the user
+        max_tokens=500,
+        #extra_body={"think": False},  # Disable internal reasoning to prevent hallucinations
+        timeout=180.0
+    )
+            break
+        except Exception:
+            continue
+    #((((((((((((((((((((((((((()))))))))))))))))))))))))))
+    # 🛑 SAFETY GUARD: If all 3 providers failed, don't try to read .choices[0]
+    if not response :
+        return "others"
+    
+    raw = response.choices[0].message.content.strip()
+  
+    allowed = ["corporate", "regulation",
+            "residential", "non-residential",
+            "Access Control", "Closures", "Window", "Glazing", "Ventilation",
+            "Heating", "Air conditioning", "Lighting", "Sun Shading",
+            "events", "others"]
+    for word in allowed:
+        if word.lower() in raw.lower():
+            return word
+    return "others"  # Fallback category
+
+
+def get_somfy_categoryOllama(title, summary):
     name="gemma3:4b" 
     system_instruction = ( "You are a master classifier for a construction news dashboard. "
                        " Assign each article with one word following the following logic:"
@@ -736,11 +796,12 @@ style_date    = ParagraphStyle("date", fontSize=14, fontName=BODY, textColor=ACC
 style_stats   = ParagraphStyle("stats", fontSize=9.5, fontName=BODY, textColor=MUTED,
                                alignment=TA_CENTER, spaceAfter=28)
 
-style_toc_link  = ParagraphStyle("toc_link", fontSize=12, fontName=BODY, textColor=INK, leading=15)
-style_toc_sub   = ParagraphStyle("toc_sub", parent=style_toc_link, leftIndent=16, textColor=TEXT)
+style_toc_link  = ParagraphStyle("toc_link", fontSize=12, fontName=BODY_BOLD, textColor=INK, leading=15)
+style_toc_sub   = ParagraphStyle("toc_sub", parent=style_toc_link, leftIndent=16,
+                                 fontName=BODY, textColor=TEXT)
 style_toc_count = ParagraphStyle("toc_count", fontSize=10, fontName=BODY, textColor=MUTED,
                                  alignment=TA_RIGHT, leading=15)
-style_toc_group = ParagraphStyle("toc_group", fontSize=9, fontName=BODY_BOLD, textColor=ACCENT,
+style_toc_group = ParagraphStyle("toc_group", fontSize=9, fontName=BODY_BOLD, textColor=INK,
                                  leading=14)
 
 style_cat     = ParagraphStyle("cat", fontSize=26, leading=30, fontName=HEAD, textColor=INK,
@@ -901,7 +962,7 @@ def _build_toc(font_size, pad):
     rows, row_styles = [], []
     for cat in top_cats:
         anchor = cat.replace(" ", "_").replace("&", "and")
-        rows.append([Paragraph(f'<a href="#{anchor}" color="#14213D">{esc(label(cat))}</a>', style_toc_link),
+        rows.append([Paragraph(f'<a href="#{anchor}" color="#14213D">{esc(label(cat)).upper()}</a>', style_toc_link),
                      Paragraph(str(len(grouped[cat])), style_toc_count)])
         row_styles.append(("LINEBELOW", (0, len(rows) - 1), (-1, len(rows) - 1), 0.5, HAIRLINE))
 
@@ -911,13 +972,13 @@ def _build_toc(font_size, pad):
             row_styles.append(("TOPPADDING", (0, len(rows) - 1), (-1, len(rows) - 1), pad + 6))
         for cat in members:
             anchor = cat.replace(" ", "_").replace("&", "and")
-            rows.append([Paragraph(f'<a href="#{anchor}" color="#2B2B33">{esc(label(cat))}</a>', style_toc_sub),
+            rows.append([Paragraph(f'<a href="#{anchor}" color="#2B2B33">{esc(label(cat)).lower()}</a>', style_toc_sub),
                          Paragraph(str(len(grouped[cat])), style_toc_count)])
             row_styles.append(("LINEBELOW", (0, len(rows) - 1), (-1, len(rows) - 1), 0.5, HAIRLINE))
 
     if others_cat:
         anchor = others_cat.replace(" ", "_").replace("&", "and")
-        rows.append([Paragraph(f'<a href="#{anchor}" color="#14213D">{esc(label(others_cat))}</a>', style_toc_link),
+        rows.append([Paragraph(f'<a href="#{anchor}" color="#14213D">{esc(label(others_cat)).upper()}</a>', style_toc_link),
                         Paragraph(str(len(grouped[others_cat])), style_toc_count)])
         row_styles.append(("LINEBELOW", (0, len(rows) - 1), (-1, len(rows) - 1), 0.5, HAIRLINE))
 
