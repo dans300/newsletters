@@ -307,6 +307,7 @@ def get_somfy_category(title, summary):
     )
             break
         except Exception:
+            time.sleep(2)
             continue
     #((((((((((((((((((((((((((()))))))))))))))))))))))))))
     # 🛑 SAFETY GUARD: If all 3 providers failed, don't try to read .choices[0]
@@ -563,6 +564,7 @@ def translate(content,t):
         )
             break
         except Exception:
+            time.sleep(2)
             continue
     try:
         return response.choices[0].message.content.strip()
