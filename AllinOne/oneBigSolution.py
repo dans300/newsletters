@@ -622,37 +622,37 @@ with open("newsletter.json", "r", encoding="utf-8") as file:
     articles = json.load(file)
 
 default_category="others"
-
+sleepSeconds=1
 for i, article in enumerate(articles):
     article["anchor_id"] = f"art_{i}"    
-    time.sleep(1)
+    time.sleep(sleepSeconds)
     t=0
     title=translate_title(article.get("title", ""),t)
-    time.sleep(1)
+    time.sleep(sleepSeconds)
     summary=translate(article.get("summary", ""),t)
-    time.sleep(1)
+    time.sleep(sleepSeconds)
     max_iters=3
     title = translate_title(article.get("title", ""), t)
-    time.sleep(1)
+    time.sleep(sleepSeconds)
     for _ in range(max_iters):
         if is_english(title, t):
             break
         print("---------------------------------------------------------------------title not in english, translating again")
         t += 0.3
         title = translate_title(article.get("title", ""), t)
-        time.sleep(1)
+        time.sleep(sleepSeconds)
     else:
         print("################################################## Giving up on title, using:", title[:60])
 
     t=0
-    time.sleep(1)
+    time.sleep(sleepSeconds)
     for _ in range(max_iters):
         if is_english(summary, t):
             break
         print("---------------------------summary not in english, translating again")
         t+=0.3
         summary=translate(article.get("summary", ""), t)
-        time.sleep(1)
+        time.sleep(sleepSeconds)
     else:
         print("################################################## Giving up on summary, using:", summary[:60])
 
