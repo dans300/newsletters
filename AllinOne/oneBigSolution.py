@@ -62,10 +62,15 @@ SITES = [
 #{"rss": True,"name": "CePro", "feed_url": "https://www.cepro.com/feed/", "needs_firecrawl": False},
 #{"rss": True,"name": "Orgalim", "feed_url": "https://orgalim.eu/en/feed/", "needs_firecrawl": False},
 #{"rss": True,"name": "CodeConfiance", "feed_url": "https://www.codeconfiance.com/feed/", "needs_firecrawl": False}
+#{"rss": False,"name": "TechnicBaie", "feed_url": "https://technicbaie.fr/", "needs_firecrawl": True},
+{"rss": True,"name": "Securitynsales", "feed_url": "http://feeds.feedburner.com/SecuritySalesIntegration-News", "needs_firecrawl": False}
+#{"rss": True,"name": "Haustec", "feed_url": "https://www.haustec.de/rss/heizung", "needs_firecrawl": False},
+
+
 ]
 
 
-SITES.extend(build_interempresas(code,needs_firecrawl=True) for code in ["PA"] )#PA,CV,PS
+#SITES.extend(build_interempresas(code,needs_firecrawl=True) for code in ["PA","CV","PS"])
 print(SITES)
 results = []
 
@@ -632,7 +637,6 @@ for i, article in enumerate(articles):
     summary=translate(article.get("summary", ""),t)
     time.sleep(sleepSeconds)
     max_iters=3
-    title = translate_title(article.get("title", ""), t)
     time.sleep(sleepSeconds)
     for _ in range(max_iters):
         if is_english(title, t):
@@ -1073,5 +1077,4 @@ for article in articles:
 doc.build(story, onFirstPage=page_footer, onLaterPages=page_footer)
 print(f"PDF saved to {file_name}")
 print(str("this is the NEW GUI"))
-
 
