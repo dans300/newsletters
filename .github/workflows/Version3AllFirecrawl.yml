@@ -95,7 +95,7 @@ jobs:
       - name: Run scripts and isolate outputs
         env:
           FIRECRAWL_API_KEY: ${{ secrets.FIRE_CRAWL }}
-          OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_KEY }}
+          OPENROUTER_API_KEY: ${{ secrets.OPN_ROUTER }}
           OLLAMA_HOST: http://localhost:11434
           PYTHONUNBUFFERED: "1"
         run: |
