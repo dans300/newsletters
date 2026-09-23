@@ -510,7 +510,7 @@ def is_english(text,t):
 
     try:
         response = client.chat.completions.create(
-            model="gemma3:4b",
+            model="google/gemma-3-4b-it", #"gemma3:4b" if OLLAMA google/gemma-3-4b-it" IF OPENROUTER
             messages=[
                 {"role": "system", "content":
                     "You decide what language a text is written in. "
@@ -543,7 +543,7 @@ def translate(content,t):
     for provider in ["DeepInfra", "Together", "Fireworks"]:
         try:
             response = client.chat.completions.create(
-                model="gemma3:4b",#"llama-3.1-8b",
+                model="google/gemma-3-4b-it",#"llama-3.1-8b",
                 messages=[
                     {"role": "system", "content": (
                         "You are a translator, you must translate the following text to English.  "
@@ -584,7 +584,7 @@ def translate_title(title,t):
     response = None
     try:
         response = client.chat.completions.create(
-            model="gemma3:4b",#"llama-3.1-8b" IS THE ORIGINAL MODEL,
+            model="google/gemma-3-4b-it",#"llama-3.1-8b" IS THE ORIGINAL MODEL,
             messages=[
                 {"role": "system", "content": (
                     "You are a summarizer, you must summarize the following headline into one sentence in english of 5 words or less. "
