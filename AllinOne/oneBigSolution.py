@@ -265,8 +265,9 @@ get_somfy_category3 es firecrawl que lo hace
 client = OpenAI(base_url="https://openrouter.ai/api/v1", api_key= os.getenv("OPENROUTER_API_KEY"),
                 http_client=custom_http_client)
 
-name="google/gemma-3-4b-it"
+
 def get_somfy_category(title, summary):
+    name="google/gemma-3-4b-it"
     system_instruction = ( "You are a master classifier for a construction news dashboard. "
                        " Assign each article with one word following the following logic:"
                          "if the article talks about anything a corporate decision where a product is not involved,assign the word (corporate) to the article, else"
@@ -308,6 +309,7 @@ def get_somfy_category(title, summary):
     #((((((((((((((((((((((((((()))))))))))))))))))))))))))
     # 🛑 SAFETY GUARD: If all 3 providers failed, don't try to read .choices[0]
     if not response :
+        print("⚠ All providers failed for category classification. Defaulting to 'others'.")
         return "others"
     
     raw = response.choices[0].message.content.strip()
