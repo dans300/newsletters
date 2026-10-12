@@ -9,42 +9,51 @@ ONLY that site, and writes out/<index>-<slug>.json.
 No PDF code here. No email here. That is make_pdf.py's job.
 """
 
+
 import argparse
 import json
 import os
 import re
-
+ 
 from sites import SITES
-
+ 
 # ── Which site is this machine doing? ─────────────────────────────────────────
 parser = argparse.ArgumentParser()
 parser.add_argument("--index", type=int, required=True,
                     help="position in sites.py SITES")
 args = parser.parse_args()
-
+ 
 if not 0 <= args.index < len(SITES):
     raise SystemExit(f"index {args.index} out of range (0..{len(SITES) - 1})")
+ 
+feed = SITES[args.index]
+print(f"shard {args.index}: {feed['name']}  <-  {feed['feed_url']}", flush=True)
 
-site = SITES[args.index]
-print(f"shard {args.index}: {site['name']}  <-  {site['feed_url']}", flush=True)
 
-
+ 
 # ══════════════════════════════════════════════════════════════════════════════
-# PASTE YOUR EXISTING PIPELINE HERE, with two changes:
+# PASTE YOUR EXISTING PIPELINE HERE, with three changes:
 #
 #   1. Delete the `for site in SITES:` loop. You are already inside one site -
-#      `site` is the dict above, with the same keys it always had (rss, name,
+#      `feed` is the dict above, with the same keys it always had (rss, name,
 #      feed_url, needs_firecrawl). Everything that was indented under that loop
 #      moves out one level.
 #
-#   2. Do NOT assign `anchor_id` here. Every shard would start numbering at 0
+#   2. Rename the loop variable to `feed`. Two find/replaces do it safely:
+#          site.    ->  feed.          (site.get("rss")   -> feed.get("rss"))
+#          site[    ->  feed[          (site["feed_url"]  -> feed["feed_url"])
+#      Both patterns leave `article["site"]` and `.get("site")` alone, which is
+#      what you want - that key is a different thing and the PDF reads it.
+#      Watch for bare `site` passed to a function, e.g. scrape(site), and any
+#      `import site` left in the file: delete it, or `import site as _site`.
+#
+#   3. Do NOT assign `anchor_id` here. Every shard would start numbering at 0
 #      and the ids would collide after the merge, so the PDF's summary links
 #      would jump to the wrong article. make_pdf.py assigns them.
 #
 # At the end of this block you need a list called `articles`, each item with
 # the keys the PDF expects: title, url, summary, category, site, clean_content.
 # ══════════════════════════════════════════════════════════════════════════════
-
 
 import site
 import ssl
@@ -74,8 +83,6 @@ from firecrawl import Firecrawl
 
 
 app = Firecrawl(api_key=os.getenv("FIRE_CRAWL"))
-#
-#
 
 
 
@@ -148,12 +155,12 @@ def get_articles_from_site(base_url):
 
 
 # step 1---------get the articles--------------------------------------------------------------
-if site.get("rss"):
+if feed.get("rss"):
     print("camino RSS")
-    articles_raw = get_articles_from_rss(site["feed_url"], site["needs_firecrawl"])
+    articles_raw = get_articles_from_rss(feed["feed_url"], feed["needs_firecrawl"])
 else:
     print("camino Normal")
-    articles_raw = get_articles_from_site(site["feed_url"])
+    articles_raw = get_articles_from_site(feed["feed_url"])
 # Step 2: Scrape each article and generate a 3-line summary
 for article in articles_raw:
     #time_module.sleep(1)#rate limits apply 
@@ -179,7 +186,7 @@ for article in articles_raw:
 
     
     results.append({
-"site": site["name"],
+"site": feed["name"],
 "title": title,
 "url": url,
 "summary": summary,
@@ -695,17 +702,27 @@ print("\n--- Processing Complete: 'articles_classified.json' is ready. ---")
 
 
 
-
 # ── Save this shard's slice ───────────────────────────────────────────────────
+# Fails loudly rather than writing a confusing file if something above
+# clobbered the config or left `articles` the wrong shape.
+if not isinstance(feed, dict):
+    raise SystemExit(
+        f"`feed` is a {type(feed).__name__}, not the site dict - something in "
+        f"the pipeline above rebound it (a stray `import feed`?)"
+    )
+if not isinstance(articles, list):
+    raise SystemExit(f"`articles` is a {type(articles).__name__}, expected a list")
+ 
+ 
 def slug(text):
     text = re.sub(r"[^a-z0-9]+", "-", str(text).lower())
     return text.strip("-") or "site"
-
-
+ 
+ 
 os.makedirs("out", exist_ok=True)
-out_path = f"out/{args.index:02d}-{slug(site['name'])}.json"
-
+out_path = f"out/{args.index:02d}-{slug(feed['name'])}.json"
+ 
 with open(out_path, "w", encoding="utf-8") as file:
     json.dump(articles, file, indent=2, ensure_ascii=False)
-
+ 
 print(f"wrote {len(articles)} articles to {out_path}", flush=True)
