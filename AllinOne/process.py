@@ -186,7 +186,7 @@ for article in articles_raw:
 "content": page.markdown or ""
 })
 
-        print(f"✓ {title[:60]}")
+    print(f"✓ {title[:60]}")
         
 
 with open("newsletter.json", "w", encoding="utf-8") as f:
