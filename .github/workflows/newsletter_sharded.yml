@@ -1,4 +1,4 @@
-name: Version-Firecrawl+ollamaLocal-Sharded
+name: Version-Firecrawl+ollamaLocal-Sharded-V6
 
 on:
   schedule:

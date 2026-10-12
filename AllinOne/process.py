@@ -524,7 +524,7 @@ def is_english(text,t):
 
     try:
         response = client.chat.completions.create(
-            model="google/gemma-3-4b-it", #"gemma3:4b" if OLLAMA google/gemma-3-4b-it" IF OPENROUTER
+            model="gemma3:4b", #"gemma3:4b" if OLLAMA google/gemma-3-4b-it" IF OPENROUTER
             messages=[
                 {"role": "system", "content":
                     "You decide what language a text is written in. "
@@ -557,7 +557,7 @@ def translate(content,t):
     for provider in ["DeepInfra", "Together", "Fireworks"]:
         try:
             response = client.chat.completions.create(
-                model="google/gemma-3-4b-it",#"llama-3.1-8b",
+                model="gemma3:4b",#"llama-3.1-8b",
                 messages=[
                     {"role": "system", "content": (
                         "You are a translator, you must translate the following text to English.  "
@@ -599,7 +599,7 @@ def translate_title(title,t):
     response = None
     try:
         response = client.chat.completions.create(
-            model="google/gemma-3-4b-it",#"llama-3.1-8b" IS THE ORIGINAL MODEL,
+            model="gemma3:4b",#"llama-3.1-8b" IS THE ORIGINAL MODEL,
             messages=[
                 {"role": "system", "content": (
                     "You are a summarizer, you must summarize the following headline into one sentence in english of 5 words or less. "
@@ -635,7 +635,7 @@ with open("newsletter.json", "r", encoding="utf-8") as file:
     articles = json.load(file)
 
 default_category="others"
-sleepSeconds=1
+sleepSeconds=0
 for i, article in enumerate(articles):
     #article["anchor_id"] = f"art_{i}"    
     time.sleep(sleepSeconds)
@@ -644,7 +644,7 @@ for i, article in enumerate(articles):
     time.sleep(sleepSeconds)
     summary=translate(article.get("summary", ""),t)
     time.sleep(sleepSeconds)
-    max_iters=3
+    max_iters=1
     time.sleep(sleepSeconds)
     for _ in range(max_iters):
         if is_english(title, t):
@@ -671,7 +671,7 @@ for i, article in enumerate(articles):
     article["title"] = title
     article["summary"] = summary
 
-    category = get_somfy_category(title, summary)
+    category = get_somfy_categoryOllama(title, summary)
     article["category"] = category
     
     print(f"[{category}] {title[:50]}...")
