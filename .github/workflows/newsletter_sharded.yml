@@ -1,0 +1,217 @@
+name: Version-Firecrawl+ollamaLocal-Sharded
+
+on:
+  schedule:
+    - cron: '0 0 10 8 *'
+    - cron: '0 0 17 8 *'
+  workflow_dispatch:
+
+jobs:
+  # ── 1. Turn sites.py into a job matrix ───────────────────────────────────────
+  # The matrix is built at runtime from SITES, so adding a site to sites.py adds
+  # a machine. You never edit this workflow again. Reads the Python list
+  # directly - no JSON copy to keep in sync.
+  setup:
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.build.outputs.matrix }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - id: build
+        run: |
+          set -euo pipefail
+          # sites.py sits next to process.py in AllinOne/, so put that on the path
+          MATRIX=$(python3 -c "import json,sys; sys.path.insert(0,'AllinOne'); from sites import SITES; print(json.dumps([s['name'] for s in SITES]))")
+          echo "matrix=$MATRIX" >> "$GITHUB_OUTPUT"
+          echo "$MATRIX"
+
+  # ── 2. One machine per site ──────────────────────────────────────────────────
+  process:
+    needs: setup
+    runs-on: ubuntu-latest
+    timeout-minutes: 350          # just under the 6h hard limit
+    strategy:
+      fail-fast: false            # one site dying must not cancel the other 11
+      max-parallel: 20            # free-tier concurrent job ceiling
+      matrix:
+        site: ${{ fromJSON(needs.setup.outputs.matrix) }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          ls -la
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Free disk space
+        continue-on-error: true
+        run: |
+          sudo rm -rf /usr/share/dotnet
+          sudo rm -rf /usr/local/lib/android
+          sudo rm -rf /opt/ghc
+          sudo rm -rf /usr/local/share/boost
+          sudo docker image prune --all --force || true
+          df -h /
+
+      # ── Ollama ──────────────────────────────────────────────────────────────
+      # Every machine restores from the same cache key. Concurrent reads are safe.
+      - name: Restore Ollama models
+        id: ollama-cache
+        uses: actions/cache/restore@v4
+        with:
+          path: /home/runner/ollama-models
+          key: ollama-llama31-8b-gemma3-4b-v1
+
+      - name: Install Ollama
+        run: curl -fsSL https://ollama.com/install.sh | sh
+
+      - name: Start Ollama
+        env:
+          OLLAMA_HOST: 127.0.0.1:11434
+          OLLAMA_MAX_LOADED_MODELS: 1
+          OLLAMA_MODELS: /home/runner/ollama-models
+        run: |
+          set -euo pipefail
+
+          # Avoid competing with an Ollama service already present on the runner.
+          pkill -x ollama || true
+          sleep 2
+
+          nohup ollama serve >"$RUNNER_TEMP/ollama.log" 2>&1 &
+          echo $! > "$RUNNER_TEMP/ollama.pid"
+
+          for i in $(seq 1 60); do
+            if curl --fail --silent http://127.0.0.1:11434/api/tags >/dev/null; then
+              echo "Ollama is ready"
+              exit 0
+            fi
+
+            if ! kill -0 "$(cat "$RUNNER_TEMP/ollama.pid")" 2>/dev/null; then
+              echo "Ollama exited unexpectedly:"
+              cat "$RUNNER_TEMP/ollama.log"
+              exit 1
+            fi
+
+            sleep 2
+          done
+
+          echo "Ollama did not become ready:"
+          cat "$RUNNER_TEMP/ollama.log"
+          exit 1
+
+      - name: Pull models
+        env:
+          OLLAMA_HOST: http://127.0.0.1:11434
+          OLLAMA_MODELS: /home/runner/ollama-models
+        run: |
+          set -euo pipefail
+          ollama pull llama3.1:8b
+          ollama pull gemma3:4b
+          ollama list
+          df -h /
+          free -h
+
+      # ── This machine's one site ─────────────────────────────────────────────
+      # strategy.job-index is this job's position in the matrix, which is the
+      # same order as SITES. Passing the index instead of the name avoids
+      # quoting problems with names, and guarantees it lines up with sites.py.
+      - name: Process ${{ matrix.site }}
+        env:
+          FIRECRAWL_API_KEY: ${{ secrets.FIRE_CRAWL }}
+          OPENROUTER_API_KEY: ${{ secrets.OPN_ROUTER }}
+          OLLAMA_HOST: http://localhost:11434
+          PYTHONUNBUFFERED: "1"
+        run: python AllinOne/process.py --index ${{ strategy.job-index }}
+
+      # Artifact names must be unique per job - v4 rejects duplicates. Index,
+      # not name, because artifact names can't hold every character a name can.
+      - name: Upload this shard
+        uses: actions/upload-artifact@v4
+        with:
+          name: shard-${{ strategy.job-index }}
+          path: out/*.json
+          if-no-files-found: error
+          retention-days: 7
+
+      # Only shard 0 writes the cache. Twelve jobs saving the same key at once
+      # just means eleven "already exists" failures.
+      - name: Save Ollama models
+        if: always() && steps.ollama-cache.outputs.cache-hit != 'true' && strategy.job-index == 0
+        uses: actions/cache/save@v4
+        with:
+          path: /home/runner/ollama-models
+          key: ollama-llama31-8b-gemma3-4b-v1
+
+  # ── 3. Gather and build, once ────────────────────────────────────────────────
+  # `needs: process` waits for ALL matrix jobs. `if: always()` means a single
+  # failed site still gets you a PDF of the other eleven.
+  build-pdf:
+    needs: process
+    if: always()
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write          # required by `gh release create`
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Download every shard
+        uses: actions/download-artifact@v4
+        with:
+          path: out
+          pattern: shard-*
+          merge-multiple: true
+
+      - run: ls -la out/
+
+      - name: Build the PDF and isolate outputs
+        run: |
+          mkdir -p hidden_old_pdfs
+          mv *.pdf hidden_old_pdfs/ 2>/dev/null || true
+
+          python AllinOne/make_pdf.py
+
+          mkdir -p output
+          mv newsletter.json output/
+          mv *.pdf output/
+
+      - name: Save output folder
+        uses: actions/upload-artifact@v4
+        with:
+          name: my-scraper-files
+          path: output/
+
+      - name: Publish as a release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          FILE=$(ls -t output/*.pdf 2>/dev/null | head -1)
+          if [ -z "$FILE" ]; then
+            echo "::warning::No PDF produced, skipping release."
+            exit 0
+          fi
+          TAG="newsletter-$(date +%Y-%m-%d-%H%M)"
+          gh release create "$TAG" "$FILE" \
+            --title "Newsletter $(date +%d\ %B\ %Y)" \
+            --notes "Automated newsletter."
