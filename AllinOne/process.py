@@ -281,10 +281,10 @@ get_somfy_category3 es firecrawl que lo hace
 """ 
 
 
-#client = OpenAI(base_url="http://localhost:11434/v1", api_key="ollama")
+client = OpenAI(base_url="http://localhost:11434/v1", api_key="ollama")
 custom_http_client = httpx.Client(verify=False)
-client = OpenAI(base_url="https://openrouter.ai/api/v1", api_key= os.getenv("OPENROUTER_API_KEY"),
-                http_client=custom_http_client)
+#client = OpenAI(base_url="https://openrouter.ai/api/v1", api_key= os.getenv("OPENROUTER_API_KEY"),
+#                http_client=custom_http_client)
 
 
 def get_somfy_category(title, summary):
@@ -327,7 +327,7 @@ def get_somfy_category(title, summary):
     )
             break
         except Exception:
-            time.sleep(2)
+            time.sleep(0)
             continue
     #((((((((((((((((((((((((((()))))))))))))))))))))))))))
     # 🛑 SAFETY GUARD: If all 3 providers failed, don't try to read .choices[0]
@@ -561,33 +561,23 @@ def is_english(text,t):
 def translate(content,t):
     response = None
     t=1 if t>1 else t
-    for provider in ["DeepInfra", "Together", "Fireworks"]:
-        try:
-            response = client.chat.completions.create(
-                model="gemma3:4b",#"llama-3.1-8b",
-                messages=[
-                    {"role": "system", "content": (
-                        "You are a translator, you must translate the following text to English.  "
-                        "Return only the translated text in english.your output is only whats asked dont say anything else"
-                        "like 'Here is the translated text' or 'The translated article is as follows'."
-                    )},
-                    {"role": "user", "content": content[:6000]}  # truncate to avoid context overflow
-                ],extra_body={
-                "provider": {
-                   "order":[ provider ],  # Example preference order
-                    "allow_fallbacks": True,
-                }
-            },
-                temperature=0.0+t,
-                max_tokens=1000,
-                timeout=180.0
-        )
-            break
-        except Exception:
-            time.sleep(2)
-            continue
     try:
+        response = client.chat.completions.create(
+            model="gemma3:4b",#"llama-3.1-8b",
+            messages=[
+                {"role": "system", "content": (
+                    "You are a translator, you must translate the following text to English.  "
+                    "Return only the translated text in english.your output is only whats asked dont say anything else"
+                    "like 'Here is the translated text' or 'The translated article is as follows'."
+                )},
+                {"role": "user", "content": content[:6000]}  # truncate to avoid context overflow
+            ],
+            temperature=0.0+t,
+            max_tokens=1000,
+            timeout=180.0)
+        
         return response.choices[0].message.content.strip()
+    
     except Exception:
         return "* " + content#translation failed, returning original content with asterisk to indicate failure
 
