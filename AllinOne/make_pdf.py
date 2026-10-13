@@ -114,6 +114,7 @@ from datetime import date
 from urllib.parse import urlparse
 from openai import OpenAI
 import httpx
+from sites import SITES 
 from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, PageBreak, HRFlowable
 from reportlab.lib.styles import ParagraphStyle
 from reportlab.lib.pagesizes import letter
