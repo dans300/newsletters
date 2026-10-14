@@ -36,7 +36,7 @@ def build_interempresas(code, days=7, needs_firecrawl=False):
             return {"rss": False,"name": name, "feed_url": url, "needs_firecrawl": needs_firecrawl}
     #return {"rss": False,"name": name, "feed_url": None, "needs_firecrawl": needs_firecrawl}
 
-
+#if the RSS NEEDS CAPTCHA THEN needs_firecrawl
 SITES = [
 {"rss": True,"name": "WindowVision", "feed_url": "https://www.wf-vision.com/feed/", "needs_firecrawl": True},
 {"rss": True,"name": "leMoniteur", "feed_url": "https://www.lemoniteur.fr/arc/outboundfeeds/rss/", "needs_firecrawl": False},
