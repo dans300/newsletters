@@ -29,7 +29,7 @@ from firecrawl import Firecrawl
 
 
 app = Firecrawl(api_key=os.getenv("FIRE_CRAWL"))
-
+where are the api keys ?
 
 CATEGORY_MAP = {
     "ps": "Protección Solar",
