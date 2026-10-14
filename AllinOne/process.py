@@ -163,7 +163,7 @@ else:
     articles_raw = get_articles_from_site(feed["feed_url"])
 # Step 2: Scrape each article and generate a 3-line summary
 for article in articles_raw:
-    time_module.sleep(2)#rate limits apply 
+    #time_module.sleep(2)#rate limits apply 
     url = article.get("url", "")
     title = article.get("title", "")
 
