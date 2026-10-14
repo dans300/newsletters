@@ -2,8 +2,7 @@ name: Version-Firecrawl+ollamaLocal-Sharded-V6
 
 on:
   schedule:
-    - cron: '0 0 10 8 *'
-    - cron: '0 0 17 8 *'
+    - cron: '0 2 * * 1'
   workflow_dispatch:
 
 jobs:
@@ -27,9 +26,59 @@ jobs:
           echo "matrix=$MATRIX" >> "$GITHUB_OUTPUT"
           echo "$MATRIX"
 
+  warm-cache:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Probe the cache
+        id: probe
+        uses: actions/cache/restore@v4
+        with:
+          path: /home/runner/ollama-models
+          key: ollama-llama31-8b-gemma3-4b-v1
+          lookup-only: true
+
+      - name: Free disk space
+        if: steps.probe.outputs.cache-hit != 'true'
+        continue-on-error: true
+        run: |
+          sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc /usr/local/share/boost
+          sudo docker image prune --all --force || true
+          df -h /
+
+      - name: Install Ollama
+        if: steps.probe.outputs.cache-hit != 'true'
+        run: curl -fsSL https://ollama.com/install.sh | sh
+
+      - name: Pull the models
+        if: steps.probe.outputs.cache-hit != 'true'
+        env:
+          OLLAMA_HOST: 127.0.0.1:11434
+          OLLAMA_MODELS: /home/runner/ollama-models
+          OLLAMA_MAX_LOADED_MODELS: 1
+        run: |
+          set -euo pipefail
+          pkill -x ollama || true
+          sleep 2
+          mkdir -p "$OLLAMA_MODELS"
+          nohup ollama serve >"$RUNNER_TEMP/ollama.log" 2>&1 &
+          for i in $(seq 1 60); do
+            curl --fail --silent http://127.0.0.1:11434/api/tags >/dev/null && break
+            sleep 2
+          done
+          OLLAMA_HOST=http://127.0.0.1:11434 ollama pull llama3.1:8b
+          OLLAMA_HOST=http://127.0.0.1:11434 ollama pull gemma3:4b
+          du -sh "$OLLAMA_MODELS"
+
+      - name: Save the models
+        if: steps.probe.outputs.cache-hit != 'true'
+        uses: actions/cache/save@v4
+        with:
+          path: /home/runner/ollama-models
+          key: ollama-llama31-8b-gemma3-4b-v1
+
   # ── 2. One machine per site ──────────────────────────────────────────────────
   process:
-    needs: setup
+    needs: [setup, warm-cache]
     runs-on: ubuntu-latest
     timeout-minutes: 350          # just under the 6h hard limit
     strategy:
@@ -143,14 +192,6 @@ jobs:
           if-no-files-found: error
           retention-days: 7
 
-      # Only shard 0 writes the cache. Twelve jobs saving the same key at once
-      # just means eleven "already exists" failures.
-      - name: Save Ollama models
-        if: always() && steps.ollama-cache.outputs.cache-hit != 'true' && strategy.job-index == 0
-        uses: actions/cache/save@v4
-        with:
-          path: /home/runner/ollama-models
-          key: ollama-llama31-8b-gemma3-4b-v1
 
   # ── 3. Gather and build, once ────────────────────────────────────────────────
   # `needs: process` waits for ALL matrix jobs. `if: always()` means a single

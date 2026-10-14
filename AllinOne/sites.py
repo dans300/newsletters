@@ -12,6 +12,8 @@ reorder it mid-run. Appending to the end is always safe.
 from datetime import timedelta,date
 import requests
 
+import urllib3
+urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 CATEGORY_MAP = {
     "ps": "Protección Solar",
@@ -19,7 +21,7 @@ CATEGORY_MAP = {
     "pa": "Puertas y Automatismos",
 }
 
-def build_interempresas(code, days=60, needs_firecrawl=False):
+def build_interempresas(code, days=7, needs_firecrawl=False):
     name = CATEGORY_MAP.get(code.lower())
     today = date.today()
     for i in range(days):
@@ -32,7 +34,7 @@ def build_interempresas(code, days=60, needs_firecrawl=False):
             valid = False
         if valid:
             return {"rss": False,"name": name, "feed_url": url, "needs_firecrawl": needs_firecrawl}
-    return {"rss": False,"name": name, "feed_url": None, "needs_firecrawl": needs_firecrawl}
+    #return {"rss": False,"name": name, "feed_url": None, "needs_firecrawl": needs_firecrawl}
 
 
 SITES = [
@@ -40,8 +42,8 @@ SITES = [
 #{"rss": True,"name": "leMoniteur", "feed_url": "https://www.lemoniteur.fr/arc/outboundfeeds/rss/", "needs_firecrawl": False},
 #{"rss": True,"name": "BauInfoConsult", "feed_url": "https://bauinfoconsult.de/feed/", "needs_firecrawl": False},
 #{"rss": True,"name": "Geb", "feed_url": "https://www.geb-info.de/rss_feed/geb-rss-feed-meldungen", "needs_firecrawl": False},
-{"rss": True,"name": "GlasWelt", "feed_url": "https://www.glaswelt.de/rss_feed/gw-rss-feed-meldungen", "needs_firecrawl": False},
-{"rss": True,"name": "Kunstsoff", "feed_url":  "https://www.kunststoffweb.de/rss/", "needs_firecrawl": False} 
+#{"rss": True,"name": "GlasWelt", "feed_url": "https://www.glaswelt.de/rss_feed/gw-rss-feed-meldungen", "needs_firecrawl": False},
+{"rss": True,"name": "Kunstsoff", "feed_url":  "https://www.kunststoffweb.de/rss/", "needs_firecrawl": False}, 
 #{"rss": True,"name": "CePro", "feed_url": "https://www.cepro.com/feed/", "needs_firecrawl": False},
 #{"rss": True,"name": "Orgalim", "feed_url": "https://orgalim.eu/en/feed/", "needs_firecrawl": False},
 #{"rss": True,"name": "CodeConfiance", "feed_url": "https://www.codeconfiance.com/feed/", "needs_firecrawl": False},
@@ -52,8 +54,12 @@ SITES = [
 
 
 #SITES.extend(build_interempresas(code,needs_firecrawl=True) for code in ["PA","CV","PS"])
-#print(SITES)
+print(SITES)
+SITES = [s for s in SITES if s]
+
+
 
 # Names are used as the job labels in the Actions UI, so they must be unique.
 _names = [site["name"] for site in SITES]
 assert len(_names) == len(set(_names)), f"duplicate site name in SITES: {_names}"
+#print(SITES)

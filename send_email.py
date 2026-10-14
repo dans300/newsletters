@@ -8,7 +8,7 @@ print("--- STARTING EMAIL PROCESS (RESEND API) ---")
 # 1. Grab API key from GitHub Actions environment
 
 api_key = os.getenv("SEND_KEY")
-#api_key = "re_VPSMEGkd_ComJLdubRbhztuqjr5okyRpR"
+
 
 # WARNING: On Resend's free tier, the "to" email MUST be the exact 
 # email address you used to sign up for your Resend account.

@@ -18,7 +18,7 @@ today = date.today().strftime("%B %d, %Y")
 
 # Create a custom HTTP client that disables SSL verification
 custom_http_client = httpx.Client(verify=False)
-openrouter_key = "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"
+openrouter_key = 
 from_where = "newsletter.json" 
 to_where = "voila.json"  # Output file for processed articles
 

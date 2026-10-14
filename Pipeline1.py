@@ -25,12 +25,8 @@ import json
 from firecrawl import Firecrawl
 
 
-app = Firecrawl(api_key="fc-3840d2d759ba4fc780bdbe2cf53ddfa5")
-#groupsomfy fc-3840d2d759ba4fc780bdbe2cf53ddfa5
-#brandon api fc-5be3e611cd87485e9e703556a4522f78
-#GITHUB fc-0647e8554d984502b02fcb4e59109672
-#somfy fc-c925bfee660343c4af8349e197605baf
-#UDEA fc-3218cf41b6364aa29841b43267cfaf71
+app = Firecrawl(api_key=)
+
 
 
 CATEGORY_MAP = {

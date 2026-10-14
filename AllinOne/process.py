@@ -283,8 +283,7 @@ get_somfy_category3 es firecrawl que lo hace
 
 client = OpenAI(base_url="http://localhost:11434/v1", api_key="ollama")
 custom_http_client = httpx.Client(verify=False)
-#client = OpenAI(base_url="https://openrouter.ai/api/v1", api_key= os.getenv("OPENROUTER_API_KEY"),
-#                http_client=custom_http_client)
+
 
 
 def get_somfy_category(title, summary):
