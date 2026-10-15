@@ -152,29 +152,7 @@ def get_articles_from_site(base_url):
         print(f"⚠ Skipped site {base_url}: {e}")
         return []
 
-def leMoniteur(base_url):
-    try:
-        homepage = app.scrape(
-            base_url,
-            formats=[{
-                "type": "json",
-                "schema": ARTICLE_SCHEMA,
-                "prompt": "Extract only the articles on the page that have something to do with (Tech for Construction) or (Store & Fermeture), each with title url and a 2 line summary, all translated to English."
-            }],
-            only_main_content=False,
-            max_age=0
-        )
-        data = homepage.json
-        print(f"{len(data.get('articles', []))} articles from {base_url}")
-        if isinstance(data, dict):
-            return data.get("articles", [])
-        elif isinstance(data, list):
-            return data
-        else:
-            return []
-    except Exception as e:
-        print(f"⚠ Skipped site {base_url}: {e}")
-        return []
+
 
 # step 1---------get the articles--------------------------------------------------------------
 if feed.get("rss"):
@@ -182,10 +160,7 @@ if feed.get("rss"):
     articles_raw = get_articles_from_rss(feed["feed_url"], feed["needs_firecrawl"])
 else:
     print("camino Normal")
-    if(feed["name"]=="leMoniteur"):
-        articles_raw = leMoniteur(feed["feed_url"])
-    else:
-        articles_raw = get_articles_from_site(feed["feed_url"])
+    articles_raw = get_articles_from_site(feed["feed_url"])
 # Step 2: Scrape each article and generate a 3-line summary
 for article in articles_raw:
     #time_module.sleep(2)#rate limits apply 

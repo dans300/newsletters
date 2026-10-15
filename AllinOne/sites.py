@@ -39,7 +39,7 @@ def build_interempresas(code, days=7, needs_firecrawl=False):
 #if the RSS NEEDS CAPTCHA THEN needs_firecrawl
 SITES = [
 {"rss": True,"name": "WindowVision", "feed_url": "https://www.wf-vision.com/feed/", "needs_firecrawl": True},
-{"rss": True,"name": "leMoniteur", "feed_url": "https://www.lemoniteur.fr/arc/outboundfeeds/rss/", "needs_firecrawl": False},
+{"rss": False,"name": "leMoniteur", "feed_url": "https://www.lemoniteur.fr/stores-et-fermetures/", "needs_firecrawl": True},
 {"rss": True,"name": "BauInfoConsult", "feed_url": "https://bauinfoconsult.de/feed/", "needs_firecrawl": False},
 {"rss": True,"name": "Geb", "feed_url": "https://www.geb-info.de/rss_feed/geb-rss-feed-meldungen", "needs_firecrawl": False},
 {"rss": True,"name": "GlasWelt", "feed_url": "https://www.glaswelt.de/rss_feed/gw-rss-feed-meldungen", "needs_firecrawl": False},
