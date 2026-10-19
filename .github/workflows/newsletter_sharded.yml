@@ -2,7 +2,7 @@ name: Version-Firecrawl+ollamaLocal-Sharded-V6
 
 on:
   schedule:
-    - cron: '0 2 * * 1'
+    - cron: '0 0 * * 1'
   workflow_dispatch:
 
 jobs:
@@ -178,6 +178,7 @@ jobs:
         env:
           FIRECRAWL_API_KEY: ${{ secrets.FIRE_CRAWL }}
           OPENROUTER_API_KEY: ${{ secrets.OPN_ROUTER }}
+          SEND_KEY: ${{ secrets.SEND_KEY }}
           OLLAMA_HOST: http://localhost:11434
           PYTHONUNBUFFERED: "1"
         run: python AllinOne/process.py --index ${{ strategy.job-index }}
