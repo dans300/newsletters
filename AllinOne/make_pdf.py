@@ -323,7 +323,7 @@ story = []
 
 # ── Cover ─────────────────────────────────────────────────────────────────────
 cover_block = [
-    Paragraph("SUPER AWESOME NEWSLETTER", style_eyebrow),
+    Paragraph("Competition's HEBDO News", style_eyebrow),
     Paragraph(f'<a name="top"/>{esc(title_text)}', style_cover),
     rule(ACCENT, 2),
     Paragraph(today, style_date),

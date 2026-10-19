@@ -44,7 +44,7 @@ payload = {
     "from": "Acme <onboarding@resend.dev>", # Resend's default testing address
     "to": [receiver_email],
     "subject": "Your Generated Newsletter",
-    "html": "<p>This is a test only.</p><p>Feedback is much appreciated! Best regards.  -Daniel SIERRA</p>",
+    "html": "<p>This week on the Competition news  .</p><p>Feedback is much appreciated! Best regards.  -Daniel</p>",
     "attachments": [
         {
             "filename": attachment_name,

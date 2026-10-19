@@ -200,9 +200,6 @@ jobs:
     needs: process
     if: always()
     runs-on: ubuntu-latest
-    permissions:
-      contents: write          # required by `gh release create`
-
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -234,25 +231,13 @@ jobs:
           python AllinOne/make_pdf.py
 
           mkdir -p output
-          mv newsletter.json output/
-          mv *.pdf output/
+          mv *.pdf output/ 2>/dev/null || true
+          ls -la output/
 
       - name: Save output folder
         uses: actions/upload-artifact@v4
         with:
           name: my-scraper-files
           path: output/
-
-      - name: Publish as a release
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          FILE=$(ls -t output/*.pdf 2>/dev/null | head -1)
-          if [ -z "$FILE" ]; then
-            echo "::warning::No PDF produced, skipping release."
-            exit 0
-          fi
-          TAG="newsletter-$(date +%Y-%m-%d-%H%M)"
-          gh release create "$TAG" "$FILE" \
-            --title "Newsletter $(date +%d\ %B\ %Y)" \
-            --notes "Automated newsletter."
+      - name: Email the newsletter
+        run: python send_email.py
