@@ -14,8 +14,11 @@ import argparse
 import json
 import os
 import re
- 
-from sites import SITES
+if os.path.exists("sites_resolved.json"):
+    with open("sites_resolved.json", encoding="utf-8") as f:
+        SITES = json.load(f)
+else:
+    from sites import SITES
  
 # ── Which site is this machine doing? ─────────────────────────────────────────
 parser = argparse.ArgumentParser()
@@ -111,7 +114,7 @@ ARTICLE_SCHEMA = {
 "required": ["articles"]
 }
         
-
+"""
 def get_articles_from_rss(feed_url, needs_firecrawl=False):
     if needs_firecrawl:
         try:
@@ -119,6 +122,32 @@ def get_articles_from_rss(feed_url, needs_firecrawl=False):
             xml = result.raw_html if hasattr(result, "raw_html") else result.rawHtml
         except Exception as e:
                 print(f"⚠ Skipped site {feed_url}: {e}")
+    else:
+        headers = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"}
+        xml = requests.get(feed_url, headers=headers).text
+
+    feed = feedparser.parse(xml)
+    print(f"{len(feed.entries)} articles from {feed_url}")
+    return [{"title": e.title, "url": e.link} for e in feed.entries]
+"""
+
+
+def get_articles_from_rss(feed_url, needs_firecrawl=False):
+    MAX_ATTEMPTS = 10
+    if needs_firecrawl:
+        delay = 5
+        for attempt in range(MAX_ATTEMPTS):
+            try:
+                result = app.scrape(feed_url, formats=["rawHtml"], proxy="enhanced", max_age=0)
+                xml = result.raw_html if hasattr(result, "raw_html") else result.rawHtml
+                break
+            except Exception as e:
+                if attempt == MAX_ATTEMPTS - 1:
+                    print(f"x Giving up on {feed_url} after {MAX_ATTEMPTS} attempts: {e}", flush=True)
+                    raise
+                print(f"  attempt {attempt + 1}/{MAX_ATTEMPTS} failed, retrying in {delay}s: {e}", flush=True)
+                time.sleep(delay)
+                delay = min(delay * 2, 300)
     else:
         headers = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"}
         xml = requests.get(feed_url, headers=headers).text
@@ -696,7 +725,7 @@ for i, article in enumerate(articles):
     category = get_somfy_categoryOllama(title, summary)
     article["category"] = category
     
-    print(f"[{category}] {title[:50]}...")
+    print(f"[{category}] {summary[:150]}...")
 
     raw_content = article.get("url", "")
     if raw_content:

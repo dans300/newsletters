@@ -55,6 +55,15 @@ jobs:
           MATRIX=$(python3 -c "import json,sys; sys.path.insert(0,'AllinOne'); from sites import SITES; print(json.dumps([s['name'] for s in SITES]))")
           echo "matrix=$MATRIX" >> "$GITHUB_OUTPUT"
           echo "$MATRIX"
+      
+      - name: Freeze the resolved site list
+        run: python3 -c "import json,sys; sys.path.insert(0,'AllinOne'); from sites import SITES; json.dump(SITES, open('sites_resolved.json','w'))"
+
+      - name: Upload the frozen list
+        uses: actions/upload-artifact@v4
+        with:
+          name: sites-resolved
+          path: sites_resolved.json
 
   warm-cache:
     needs: guard
@@ -207,6 +216,10 @@ jobs:
       # strategy.job-index is this job's position in the matrix, which is the
       # same order as SITES. Passing the index instead of the name avoids
       # quoting problems with names, and guarantees it lines up with sites.py.
+      - name: Download the frozen site list
+        uses: actions/download-artifact@v4
+        with:
+          name: sites-resolved
       - name: Process ${{ matrix.site }}
         env:
           FIRECRAWL_API_KEY: ${{ secrets.FIRE_CRAWL }}
