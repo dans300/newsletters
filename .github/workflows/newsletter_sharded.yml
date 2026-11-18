@@ -246,6 +246,12 @@ jobs:
     needs: [guard, process]
     if: always() && needs.guard.outputs.go == 'true'
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -279,7 +285,28 @@ jobs:
           mkdir -p output
           mv *.pdf output/ 2>/dev/null || true
           ls -la output/
+      - name: Stage the site
+        run: |
+          set -euo pipefail
+          mkdir -p site
+          PDF=$(ls -t output/*.pdf | head -1)
+          STAMP=$(date +%Y-%m-%d)
+          cp "$PDF" "site/newsletter-$STAMP.pdf"
+          cat > site/index.html <<HTML
+          <!doctype html><meta charset="utf-8">
+          <meta http-equiv="refresh" content="0; url=newsletter-$STAMP.pdf">
+          <title>Construction newsletter</title>
+          <p><a href="newsletter-$STAMP.pdf">Open the latest newsletter</a></p>
+          HTML
+          ls -la site/
 
+      - uses: actions/configure-pages@v5
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: site
+
+      - uses: actions/deploy-pages@v4
       - name: Save output folder
         uses: actions/upload-artifact@v4
         with:

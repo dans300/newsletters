@@ -229,7 +229,7 @@ for i, article in enumerate(articles):
     article["category"] = category
 
     
-    print(f"[{category}] {article['title'][:50]}...")
+    print(f"[{category}] {article['summary'][:150]}...")
     raw_content = article.get("content", "")
     if raw_content:
         article["clean_content"] = ""#clean_article(raw_content)

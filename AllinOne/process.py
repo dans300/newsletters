@@ -390,7 +390,7 @@ explain, never create a category that is not listed.
    1a. entry device (gate, garage door, intercom, video entry) -> Access Control
    1b. blind, awning, pergola, shutter for sun/privacy         -> Sun Shading
    1c. security or storm barrier with no entry function        -> Closures
-   1d. window frame, sash or glass                             -> Window & Glazing
+   1d. window ,Window frame, sash or glass                             -> Window & Glazing
    1e. heating, cooling or ventilation equipment               -> HVAC
    1f. lamp, luminaire or electric light                       -> Lighting
    
