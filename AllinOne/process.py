@@ -384,18 +384,18 @@ Classify what the subject IS, never what it achieves.
 Reply with one word only - the category name. Never output a number, never
 explain, never create a category that is not listed.
 
-1. is this article about any of this brands :
+1. is this article is about any of this brands :
  interempresas, leMoniteur, BauInfoConsult, Geb, GlasWelt, Kunstsoff, CePro, Orgalim, CodeConfiance, TechnicBaie, Securitynsales, Haustec?
  ->competitors
 
 2. What IS this product? (classify the device, not the benefit it delivers)
    Check these six in order and take the first that matches:
-   1a. entry device (gate, garage door, intercom, video entry) -> Access Control
-   1b. blind, awning, pergola, shutter for sun/privacy         -> Sun Shading
-   1c. security or storm barrier with no entry function        -> Closures
-   1d. window ,Window frame, sash or glass                     -> Window & Glazing
-   1e. heating, cooling or ventilation equipment               -> HVAC
-   1f. lamp, luminaire or electric light                       -> Lighting
+   2a. entry device (gate, garage door, intercom, video entry) -> Access Control
+   2b. blind, awning, pergola, shutter for sun/privacy         -> Sun Shading
+   2c. security or storm barrier with no entry function        -> Closures
+   2d. window ,Window frame, sash or glass                     -> Window & Glazing
+   2e. heating, cooling or ventilation equipment               -> HVAC
+   2f. lamp, luminaire or electric light                       -> Lighting
    
 3.does this article talk about devices connectivity?
     Check these in order and take the first that matches:
@@ -403,8 +403,9 @@ explain, never create a category that is not listed.
     3b. does it talk about a building? -> smart building
 
 4. Housing, or not housing?
-   housing -> residential
-   not housing -> non-residential
+   Check these in order and take the first that matches:
+   4a.housing -> residential
+   4b.not housing -> non-residential
 
 
 5. Is the subject a company as a business (results, M&A, appointments), no product?
