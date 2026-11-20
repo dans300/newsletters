@@ -390,11 +390,11 @@ explain, never create a category that is not listed.
 
 2. What IS this product? (classify the device, not the benefit it delivers)
    Check these six in order and take the first that matches:
-   2a. entry device (gate, garage door, intercom, video entry) -> Access Control
+   2a. entry device (gate, door, intercom, video entry) -> Access Control
    2b. blind, awning, pergola, shutter for sun/privacy         -> Sun Shading
    2c. security or storm barrier with no entry function        -> Closures
    2d. window ,Window frame, sash or glass                     -> Window & Glazing
-   2e. heating, cooling or ventilation equipment               -> HVAC
+   2e. heating,heating pumps, cooling or ventilation equipment               -> HVAC
    2f. lamp, luminaire or electric light                       -> Lighting
    
 3.does this article talk about devices connectivity?
