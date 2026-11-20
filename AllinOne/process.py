@@ -384,32 +384,42 @@ Classify what the subject IS, never what it achieves.
 Reply with one word only - the category name. Never output a number, never
 explain, never create a category that is not listed.
 
+1. is this article about any of this brands :
+ interempresas, leMoniteur, BauInfoConsult, Geb, GlasWelt, Kunstsoff, CePro, Orgalim, CodeConfiance, TechnicBaie, Securitynsales, Haustec?
+ ->competitors
 
-1. What IS this product? (classify the device, not the benefit it delivers)
+2. What IS this product? (classify the device, not the benefit it delivers)
    Check these six in order and take the first that matches:
    1a. entry device (gate, garage door, intercom, video entry) -> Access Control
    1b. blind, awning, pergola, shutter for sun/privacy         -> Sun Shading
    1c. security or storm barrier with no entry function        -> Closures
-   1d. window ,Window frame, sash or glass                             -> Window & Glazing
+   1d. window ,Window frame, sash or glass                     -> Window & Glazing
    1e. heating, cooling or ventilation equipment               -> HVAC
    1f. lamp, luminaire or electric light                       -> Lighting
    
+3.does this article talk about devices connectivity?
+    Check these in order and take the first that matches:
+    3a. does it talk about a house ? -> smart home
+    3b. does it talk about a building? -> smart building
 
-2. Housing, or not housing?
+4. Housing, or not housing?
    housing -> residential
-   else    -> non-residential
+   not housing -> non-residential
 
 
-3. Is the subject a company as a business (results, M&A, appointments), no product?
+5. Is the subject a company as a business (results, M&A, appointments), no product?
    yes -> corporate
 
-4. Is the subject a law, code, standard or compliance?
+6.is the subject about the market , trends, the economy or finance?
+   yes -> market
+
+7. Is the subject a law, code, standard or compliance?
    yes -> regulation
 
-5. Is the subject a trade fair, award, anniversary or conference?
+8. Is the subject a trade fair, award, anniversary or conference?
    yes -> events
 
-6. none of these   -> others
+9. none of these   -> others
 
    """
     )                                               
@@ -448,7 +458,7 @@ explain, never create a category that is not listed.
     
     raw = response.choices[0].message.content.strip()
   
-    allowed = ["corporate", "regulation",
+    allowed = ["corporate", "regulation","market","competitors","smart home","smart building",
             "residential", "non-residential",
             "Access Control", "Closures", "Window", "Glazing", "Ventilation",
             "Heating", "Air conditioning", "Lighting", "Sun Shading",

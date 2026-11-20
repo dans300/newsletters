@@ -237,7 +237,7 @@ def get_site_name(url):
 
 sites = list(dict.fromkeys(get_site_name(a.get("feed_url")) for a in SITES))
 title_text = " | ".join(sites)
-file_name = title_text.replace(" | ", "") + " " + today + ".pdf"
+file_name = today + " " + title_text.replace(" | ", "") + ".pdf"
 
 # --- titles auto size ---
 _n = len(title_text)
@@ -257,11 +257,14 @@ PRODUCT_CATS = ["Access Control", "Closures", "Window", "Glazing", "Ventilation"
 
 CONSTRUCTION_CATS = ["residential", "non-residential"]
 
+SMART_CATS = ["smart home", "smart building"]
+
 # each entry is (heading shown on the cover, the categories it contains).
 # groups appear in this order, after the ungrouped categories. add more freely.
 GROUPS = [
     ("CONSTRUCTION", CONSTRUCTION_CATS),
-    ("PRODUCTS &amp; TECH", PRODUCT_CATS),
+    ("APPLICATIONS", PRODUCT_CATS),
+    ("SMART", SMART_CATS)
 ]
 
 def label(cat):
