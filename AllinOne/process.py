@@ -384,7 +384,7 @@ Classify what the subject IS, never what it achieves.
 Reply with one word only - the category name. Never output a number, never
 explain, never create a category that is not listed.
 
-1. is this article is about any of this brands :
+1. is this article about any of this brands :
  interempresas, leMoniteur, BauInfoConsult, Geb, GlasWelt, Kunstsoff, CePro, Orgalim, CodeConfiance, TechnicBaie, Securitynsales, Haustec?
  ->competitors
 
