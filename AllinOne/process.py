@@ -394,7 +394,7 @@ explain, never create a category that is not listed.
    2b. blind, awning, pergola, shutter for sun/privacy         -> Sun Shading
    2c. security or storm barrier with no entry function        -> Closures
    2d. window ,Window frame, sash or glass                     -> Window & Glazing
-   2e. heating,heating pumps, cooling or ventilation equipment               -> HVAC
+   2e. heating,heating pumps, cooling or ventilation equipment -> HVAC
    2f. lamp, luminaire or electric light                       -> Lighting
    
 3.does this article talk about devices connectivity?
